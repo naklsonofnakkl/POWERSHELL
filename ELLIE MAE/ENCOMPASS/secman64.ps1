@@ -19,3 +19,6 @@ Read-Host -Prompt "Press any key to install secman.dll"
 Start-Process regsvr32.exe secman.dll
 Read-Host -Prompt "Press any key to install secman64.dll"
 Start-Process regsvr32.exe secman64.dll
+write-host "DLL have been properly installed!"
+sleep 3
+exit
