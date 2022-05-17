@@ -8,6 +8,9 @@ into a derelict state if they are no longer used at my place of employment.
 If there are any dangerous exploits or issues with my scripts, please feel free to
 toss me an issue request. I greatly appreciate the extra set of eyes!
 </p>
->Thanks,
+
+> Thanks,
 >
->-Nakl
+> -Nakl
+
+![readme](https://user-images.githubusercontent.com/5350845/168914194-caca158d-3669-458d-ac26-3f703c31c667.gif)
