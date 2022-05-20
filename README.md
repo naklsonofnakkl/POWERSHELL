@@ -1,4 +1,6 @@
-# POWERSHELL SCRIPTS
+![POWERSHELL](https://user-images.githubusercontent.com/5350845/169578262-63c36cee-b3e4-40a4-9f72-241a087fb42f.png)
+
+# What is all this?
 <p>
 Here is a list of all the PowerShell scripts I have written organized by application.
 I will try to keep them updated as much as possible, though some will inevitably fall
