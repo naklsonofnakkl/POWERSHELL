@@ -1,3 +1,4 @@
+![POWERSHELL_LOGO](https://user-images.githubusercontent.com/5350845/169599484-bd8a6bdc-d7c9-4efb-8d19-53e0242a9124.png) 
 # POWERSHELL SCRIPTS
 <p>
 Here is a list of all the PowerShell scripts I have written organized by application.
@@ -9,8 +10,5 @@ If there are any dangerous exploits or issues with my scripts, please feel free 
 toss me an issue request. I greatly appreciate the extra set of eyes!
 </p>
 
-> Thanks,
-> 
-> -Nakl
-
-![readme](https://user-images.githubusercontent.com/5350845/168914194-caca158d-3669-458d-ac26-3f703c31c667.gif)
+### Thanks,
+![sig](https://user-images.githubusercontent.com/5350845/169599763-25d6e27a-c6aa-4fcc-8b03-4c9c095db2ab.png)
