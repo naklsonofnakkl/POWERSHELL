@@ -3,7 +3,7 @@ Stop-Process -Name 'Teams'
 ## change to the teams cache folder
 set-location $env:APPDATA\Microsoft\Teams
 ## Remove the previous OLD directory
-Remove-Item OLD -Recurse
+Remove-Item OLD -Recurse -ErrorAction SilentlyContinue
 New-Item OLD -ItemType Directory
 ## Moves all files into OLD direction except Outlook Add-on
 $filedest = ".\OLD"
