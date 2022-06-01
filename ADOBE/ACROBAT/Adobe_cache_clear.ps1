@@ -19,7 +19,7 @@ Remove-Item -Path .\*.old -Recurse -ErrorAction SilentlyContinue
 ## Clear the cache for both Adobe DC and XI
 Write-Output "Clearing Cache..."
 Rename-Item -Path .\"DC" .\"DC.old" -ErrorAction SilentlyContinue
-Rename-Item -Path .\"XI" .\"XI.old" -ErrorAction SilentlyContinu
+Rename-Item -Path .\"XI" .\"XI.old" -ErrorAction SilentlyContinue
 Write-Output "Cache Cleared!"
 ## Close script
 Sleep 3

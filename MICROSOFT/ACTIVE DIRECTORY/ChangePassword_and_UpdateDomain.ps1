@@ -57,12 +57,4 @@ Else {
   exit
 }
 #In the event of a permission error accessing Set-ADAccountPassword
-Remove-Variable user
-Remove-Variable oldPassword
-Remove-Variable newPassword
-Write-Host "Password has FAILED to update!"
-sleep 1
-Write-Host "Please reach out to IT Support to have the password changed manually..."
-Write-Host "Closing..."
-sleep 5
 exit
