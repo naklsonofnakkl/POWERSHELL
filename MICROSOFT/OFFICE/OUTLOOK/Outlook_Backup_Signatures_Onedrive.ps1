@@ -13,7 +13,7 @@ elseif ( -not ( Test-Path -Path $path\Signatures.old ) ) {
 }
 #If there is a signature folder and a .old, erase the .old, rename signature folder and create fresh Copy
 else {
-  Remove-Item -Path $path\Signatures.old -Recurse
+  Remove-Item -Path $path\Signatures.old -Recurse -Force
   Rename-Item -Path "$path\Signatures" "$path\Signatures.old"
   Copy-Item -Path $env:APPDATA\Microsoft\Signatures -Destination $path -recurse -Force
 }
