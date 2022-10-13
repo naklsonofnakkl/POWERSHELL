@@ -1,26 +1,40 @@
-## Close Adobe Acrobat
-Read-Host -Prompt "Please Close Adobe First then Press any Key to Continue"
-## get Acrobat process
-$acrobat = Get-Process Acrobat -ErrorAction SilentlyContinue
-if ($acrobat) {
-  ## try gracefully first
-  $acrobat.CloseMainWindow()
-  ## kill after five seconds
-  Sleep 5
-  if (!$acrobat.HasExited) {
-    $acrobat | Stop-Process -Force
+#Directories I don't want to keep retyping in
+  $adobelocal = "$env:LOCALAPPDATA\Adobe\Acrobat"
+  $oldDC = "$env:LOCALAPPDATA\Adobe\Acrobat\DC.old"
+  $oldXI = "$env:LOCALAPPDATA\Adobe\Acrobat\XI.old"
+  $adobeDC = "$env:LOCALAPPDATA\Adobe\Acrobat\DC"
+  $adobeXI = "$env:LOCALAPPDATA\Adobe\Acrobat\XI"
+  ## Close out of Adobe
+  $acrobat = Get-Process Acrobat -ErrorAction SilentlyContinue
+  if ($acrobat) {
+    ## try gracefully first
+    $acrobat.CloseMainWindow()
+    ## kill after five seconds
+    Sleep 5
+    if (!$acrobat.HasExited) {
+      $acrobat | Stop-Process -Force
+    }
+  }
+#If there is no DC folder create one and copy files into it
+#LOCAL
+if ( -not ( Test-Path -Path $adobeDC ) ){
+  if (Test-Path -Path $oldXI) {
+    Remove-Item -Path "$adobelocal\*.old" -Recurse -ErrorAction SilentlyContinue
+    Rename-Item -Path "$adobelocal\XI" "$adobelocal\XI.old" -ErrorAction SilentlyContinue
+  }
+  else {
+    Rename-Item -Path "$adobelocal\XI" "$adobelocal\XI.old" -ErrorAction SilentlyContinue
   }
 }
-Remove-Variable acrobat
-## Navigates to local AppData
-set-location $env:LOCALAPPDATA\Adobe\Acrobat
-## Removes previous OLD folder(s)
-Remove-Item -Path .\*.old -Recurse -ErrorAction SilentlyContinue
-## Clear the cache for both Adobe DC and XI
-Write-Output "Clearing Cache..."
-Rename-Item -Path .\"DC" .\"DC.old" -ErrorAction SilentlyContinue
-Rename-Item -Path .\"XI" .\"XI.old" -ErrorAction SilentlyContinue
-Write-Output "Cache Cleared!"
-## Close script
-Sleep 3
-exit
+elseif ( -not ( Test-Path -Path $adobeXI ) ) {
+  if (Test-Path -Path $oldDC) {
+    Remove-Item -Path "$adobelocal\*.old" -Recurse -ErrorAction SilentlyContinue
+    Rename-Item -Path "$adobelocal\DC" "$adobelocal\DC.old" -ErrorAction SilentlyContinue
+  }
+  else {
+    Rename-Item -Path "$adobelocal\DC" "$adobelocal\DC.old" -ErrorAction SilentlyContinue
+  }
+}
+else {
+Remove-Item -Path "$adobelocal\*" -Recurse -ErrorAction SilentlyContinue
+}

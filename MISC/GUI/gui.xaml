@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Password_Reset"
         mc:Ignorable="d"
-        Title="All in One Kit" Height="326" Width="403" Icon="/favicon.png" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Background="#FF004A88">
+        Title="All in One Kit" Height="326" Width="403" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Background="#FF004A88">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -17,7 +17,7 @@
             <ColumnDefinition Width="43*"/>
             <ColumnDefinition Width="298*"/>
         </Grid.ColumnDefinitions>
-        <TextBox HorizontalAlignment="Left" Margin="10,232,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="382" Height="67" Background="#FF0E416B" Foreground="White" TextChanged="TextBox_TextChanged" FontSize="10" FontFamily="Cascadia Mono" BorderBrush="#FF1679CC" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3"/>
+        <TextBox HorizontalAlignment="Left" Margin="10,232,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="382" Height="67" Background="#FF0E416B" Foreground="White" FontSize="10" FontFamily="Cascadia Mono" BorderBrush="#FF1679CC" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3"/>
         <Label Content="ERROR OUTPUT:" HorizontalAlignment="Left" Margin="7,210,0,0" VerticalAlignment="Top" Foreground="White" FontSize="9" FontWeight="Bold" Grid.Row="1" Grid.Column="1" Height="22" Width="80" Grid.ColumnSpan="2"/>
         <Button Grid.Column="3" Content="CLEAR" HorizontalAlignment="Left" Margin="211,55,0,0" Grid.Row="1" VerticalAlignment="Top"/>
         <Label Grid.Column="3" Content="Microsoft Teams" HorizontalAlignment="Left" Margin="182,24,0,0" Grid.Row="1" VerticalAlignment="Top" Foreground="White"/>

@@ -1,19 +1,49 @@
-## Close out of OUTLOOK
-Stop-Process -Name 'OUTLOOK'
-## Opens AppData, removes previous OLD folder and replaces it with new one
-set-location $env:APPDATA\Microsoft\Outlook
-Remove-Item OLD -Recurse -ErrorAction SilentlyContinue
-New-Item OLD -ItemType Directory
-## Moves cache files into OLD folder
-Move-Item -Path .\*.srs .\OLD
-Move-Item -Path .\*.xml .\OLD
-## Navigates to local AppData
-set-location $env:LOCALAPPDATA\Microsoft\Outlook
-## Removes previous OLD folder(s)
-Remove-Item -Path .\*.old -Recurse
-Remove-Item -Path .\OLD -Recurse
-## Renames the cache folders as .old
-Rename-Item -Path .\"RoamCache" .\"RoamCache.old"
-Rename-Item -Path .\"Offline Address Books" .\"Offline Address Books.old"
+##This script will close Outlook and clear the cache
+##Located in the Local and Roaming appdata locations
+
+#Directories I don't want to keep retyping in
+  $outroam = "$env:APPDATA\Microsoft\Outlook"
+  $outlocal = "$env:LOCALAPPDATA\Microsoft\Outlook"
+  $oldroam = "$env:APPDATA\Microsoft\Outlook\OLD"
+  $oldlocal = "$env:LOCALAPPDATA\Microsoft\Outlook\OLD"
+  ## Close out of OUTLOOK
+  $outlook = Get-Process OUTLOOK -ErrorAction SilentlyContinue
+  if ($outlook) {
+    ## try gracefully first
+    $outlook.CloseMainWindow()
+    ## kill after five seconds
+    Sleep 5
+    if (!$outlook.HasExited) {
+      $outlook | Stop-Process -Force
+    }
+  }
+#If there is no OLD folder create one and copy files into it
+#ROAMING
+if ( -not ( Test-Path -Path $oldroam ) ){
+  New-Item -path $outroam -name OLD -ItemType Directory
+  Move-Item -Path $outroam\*.srs $outroam\OLD
+  Move-Item -Path $outroam\*.xml $outroam\OLD
+}
+#If there is an OLD folder erase the OLD folder and create fresh Copy
+#ROAMING
+else {
+  Remove-Item -Path "$outroam\OLD" -Recurse -Force
+  New-Item -path $outroam -name OLD -ItemType Directory
+  Move-Item -Path $outroam\*.srs $outroam\OLD
+  Move-Item -Path $outroam\*.xml $outroam\OLD
+}
+#If there are no .old folders then rename all folders to end in .old
+#LOCAL
+if ( -not ( Test-Path -Path "$outlocal\RoamCache.old" ) ){
+  Rename-Item -Path "$outlocal\RoamCache" "$outlocal\RoamCache.old"
+  Rename-Item -Path "$outlocal\Offline Address Books" "$outlocal\Offline Address Books.old"
+}
+#If there are .old folders, delete them and convert current foldres into .old
+#LOCAL
+else {
+  Remove-Item -Path $outlocal\*.old -Recurse
+  Rename-Item -Path "$outlocal\RoamCache" "$outlocal\RoamCache.old"
+  Rename-Item -Path "$outlocal\Offline Address Books" "$outlocal\Offline Address Books.old"
+}
 ## Closes Powershell
 exit
