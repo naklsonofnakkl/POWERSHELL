@@ -7,16 +7,7 @@
   $oldroam = "$env:APPDATA\Microsoft\Outlook\OLD"
   $oldlocal = "$env:LOCALAPPDATA\Microsoft\Outlook\OLD"
   ## Close out of OUTLOOK
-  $outlook = Get-Process OUTLOOK -ErrorAction SilentlyContinue
-  if ($outlook) {
-    ## try gracefully first
-    $outlook.CloseMainWindow()
-    ## kill after five seconds
-    Sleep 5
-    if (!$outlook.HasExited) {
-      $outlook | Stop-Process -Force
-    }
-  }
+ Stop-Process -name OUTLOOK -force
 #If there is no OLD folder create one and copy files into it
 #ROAMING
 if ( -not ( Test-Path -Path $oldroam ) ){

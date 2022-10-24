@@ -36,5 +36,10 @@ elseif ( -not ( Test-Path -Path $adobeXI ) ) {
   }
 }
 else {
+  Try {
 Remove-Item -Path "$adobelocal\*" -Recurse -ErrorAction SilentlyContinue
+  }
+  catch {
+    write-host "There is nothing here! Check if Adobe is currently installed!"
+  }
 }

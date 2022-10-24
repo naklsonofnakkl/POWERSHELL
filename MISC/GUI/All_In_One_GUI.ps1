@@ -1,7 +1,7 @@
 ## THIS IS STILL AN ACTIVE WORK IN PROGRESS!
 ## PLEASE DO NOT ATTEMPT TO RUN THIS SCRIPT
 ## AS IT HAS NOT BEEN FINISHED AND MAY HAVE
-## UNINTENTIONAL RESULTS! 
+## UNINTENTIONAL RESULTS!
 
 
 Add-Type -AssemblyName PresentationFramework
@@ -14,16 +14,7 @@ Function Clear-OutlookCache {
     $oldroam = "$env:APPDATA\Microsoft\Outlook\OLD"
     $oldlocal = "$env:LOCALAPPDATA\Microsoft\Outlook\OLD"
     ## Close out of OUTLOOK
-    $outlook = Get-Process OUTLOOK -ErrorAction SilentlyContinue
-    if ($outlook) {
-      ## try gracefully first
-      $outlook.CloseMainWindow()
-      ## kill after five seconds
-      Sleep 5
-      if (!$outlook.HasExited) {
-        $outlook | Stop-Process -Force
-      }
-    }
+ Stop-Process -name OUTLOOK -force
   #If there is no OLD folder create one and copy files into it
   #ROAMING
   if ( -not ( Test-Path -Path $oldroam ) ){
@@ -59,34 +50,27 @@ Function Clear-TeamsCache {
     $teamroam = "$env:APPDATA\Microsoft\Teams"
     $oldroam = "$env:APPDATA\Microsoft\Teams\OLD"
     ## Close out of TEAMS
-    $teams = Get-Process Teams -ErrorAction SilentlyContinue
-    if ($teams) {
-      ## try gracefully first
-      $teams.CloseMainWindow()
-      ## kill after five seconds
-      Sleep 5
-      if (!$teams.HasExited) {
-        $teams | Stop-Process -Force
-      }
-    }
+   Stop-Process -name Teams -force
   #If there is no OLD folder create one and copy files into it
   #ROAMING
   if ( -not ( Test-Path -Path $oldroam ) ){
     New-Item -path $teamroam -name OLD -ItemType Directory
-    $filedest = "$teamroam\OLD"
-    $exclude = "meeting-addin"
-    $Files = GCI -path $env:APPDATA\Microsoft\Teams | Where-object {$_.name -ne $exclude}
-    foreach ($file in $files){move-item -path $file -destination $filedest}
+    set-location $teamroam
+    $filedest = $oldroam
+    $exclude = ".\meeting-addin", ".\OLD"
+    $Files = GCI -path $teamroam | Where-object {$_.name -ne $exclude}
+    foreach ($file in $files){move-item -path $file -destination $filedest -ErrorAction SilentlyContinue}
   }
   #If there is an OLD folder erase the OLD folder and create fresh Copy
   #ROAMING
   else {
     Remove-Item -Path "$teamroam\OLD" -Recurse -Force
     New-Item -path $teamroam -name OLD -ItemType Directory
-    $filedest = "$teamroam\OLD"
-    $exclude = "meeting-addin"
-    $Files = GCI -path $env:APPDATA\Microsoft\Teams | Where-object {$_.name -ne $exclude}
-    foreach ($file in $files){move-item -path $file -destination $filedest}
+    set-location $teamroam
+    $filedest = $oldroam
+    $exclude = ".\meeting-addin", ".\OLD"
+    $Files = GCI -path $teamroam | Where-object {$_.name -ne $exclude}
+    foreach ($file in $files){move-item -path $file -destination $filedest -ErrorAction SilentlyContinue}
     }
   }
 
@@ -129,7 +113,12 @@ Function Clear-AdobeCache {
     }
   }
   else {
-Remove-Item -Path "$adobelocal\*" -Recurse -ErrorAction SilentlyContinue
+    Try {
+  Remove-Item -Path "$adobelocal\*" -Recurse -ErrorAction SilentlyContinue
+    }
+    catch {
+      write-host "There is nothing here! Check if Adobe is currently installed!"
+    }
   }
 }
 
