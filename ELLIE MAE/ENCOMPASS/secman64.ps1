@@ -6,19 +6,20 @@ if ($encompass) {
   ## try gracefully first
   $encompass.CloseMainWindow()
   ## kill after five seconds
-  Sleep 5
+  Start-Sleep 5
   if (!$encompass.HasExited) {
     $encompass | Stop-Process -Force
   }
 }
 Remove-Variable encompass
-## Change to Outlook Security Manager folders
-set-location "C:\Program Files (x86)\Common Files\Outlook Security Manager"
-## Register the DLL
-Read-Host -Prompt "Press any key to install secman.dll"
-Start-Process regsvr32.exe secman.dll
-Read-Host -Prompt "Press any key to install secman64.dll"
-Start-Process regsvr32.exe secman64.dll
-write-host "DLL have been properly installed!"
-sleep 3
+# Register secman.dll and secman64.dll
+$regsvr32 = "regsvr32.exe"
+$regsvr32Args = "/s ""C:\Program Files (x86)\Common Files\Outlook Security Manager\secman.dll"""
+Start-Process -FilePath $regsvr32 -ArgumentList $regsvr32Args -Wait
+
+$regsvr32Args = "/s ""C:\Program Files (x86)\Common Files\Outlook Security Manager\secman64.dll"""
+Start-Process -FilePath $regsvr32 -ArgumentList $regsvr32Args -Wait
+
+# Display a message indicating that the registration is complete
+Write-Host "DLLs registered successfully."
 exit

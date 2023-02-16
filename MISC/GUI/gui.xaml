@@ -33,6 +33,7 @@
         <Button Grid.Column="3" Content="INSTALL" HorizontalAlignment="Left" Margin="43,160,0,0" Grid.Row="1" VerticalAlignment="Top"/>
         <Button Grid.Column="3" Content="REMOVE" HorizontalAlignment="Left" Margin="98,160,0,0" Grid.Row="1" VerticalAlignment="Top"/>
         <Label Grid.Column="3" Content="Print to PDF Reinstall" HorizontalAlignment="Left" Margin="36,129,0,0" Grid.Row="1" VerticalAlignment="Top" Background="Transparent" Foreground="White"/>
+        <TextBox Grid.Column="3" HorizontalAlignment="Left" Margin="188,185,0,0" Grid.Row="1" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="91"/>
 
     </Grid>
 </Window>
