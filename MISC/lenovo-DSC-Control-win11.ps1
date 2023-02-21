@@ -3,19 +3,21 @@ This is a script to install the Lenovo update for
 flicking monitor issues on the Windows 11 OS.
 #>
 
-##Download the update file
-Invoke-WebRequest -Uri "https://download.lenovo.com/km/media/attachment/DSC_Control.exe" -OutFile C:\Users\$env:UserName\Downloads\DSC_Control.exe
-##Chcek if the file has been downloaded and execute DSC_Control
-if ( -not ( Test-Path -Path $Change\DSC_Control.exe ) ){
-  set-location "C:\Users\$env:UserName\Downloads"
-  .\DSC_Control.exe 1
+$url = "https://download.lenovo.com/km/media/attachment/DSC_Control.exe"
+$filePath = "C:\Users\$env:UserName\Downloads\DSC_Control.exe"
+$executablePath = "C:\Users\$env:UserName\Downloads\DSC_Control.exe"
+
+# Download the file and show a progress bar
+Invoke-WebRequest -Uri $url -OutFile $filePath -UseBasicParsing -TimeoutSec 120 -Verbose
+
+# Validate that the file has been downloaded
+if (Test-Path $filePath) {
+    # Execute the downloaded file
+    Start-Process $executablePath
+
+    # Delete the downloaded file
+    Remove-Item $filePath
+} else {
+    Write-Output "Download failed, file not found: $filePath"
 }
-##If the file doesn't download immediately, wait a min and execute DSC_Control
-else {
-  Sleep 60
-  set-location "C:\Users\$env:UserName\Downloads"
-  .\DSC_Control.exe 1
-}
-##Remove the download
-remove-item C:\Users\$env:UserName\Downloads\DSC_Control.exe
 exit

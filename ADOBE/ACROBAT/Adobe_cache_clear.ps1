@@ -5,16 +5,26 @@
   $adobeDC = "$env:LOCALAPPDATA\Adobe\Acrobat\DC"
   $adobeXI = "$env:LOCALAPPDATA\Adobe\Acrobat\XI"
   ## Close out of Adobe
-  $acrobat = Get-Process Acrobat -ErrorAction SilentlyContinue
-  if ($acrobat) {
-    ## try gracefully first
-    $acrobat.CloseMainWindow()
-    ## kill after five seconds
-    Sleep 5
-    if (!$acrobat.HasExited) {
-      $acrobat | Stop-Process -Force
-    }
+  Stop-Process -name Acrobat -force 
+  # Set the duration of the timer in seconds
+  $duration = 10
+  
+  # Initialize the progress bar
+  Write-Progress -Activity "Waiting for $duration seconds while Adobe closes..." -PercentComplete 0
+  
+  # Loop through the timer and update the progress bar
+  for ($i = 1; $i -le $duration; $i++) {
+      # Update the progress bar with the current progress
+      $percent = ($i / $duration) * 100
+      Write-Progress -Activity "Waiting for $duration seconds while Adobe closes..." -PercentComplete $percent -Status "Seconds remaining: $($duration - $i)"
+      
+      # Pause for 1 second
+      Start-Sleep -Seconds 1
   }
+  
+  # Clear the progress bar once the timer is complete
+  Clear-Progress -ErrorAction SilentlyContinue
+
 #If there is no DC folder create one and copy files into it
 #LOCAL
 if ( -not ( Test-Path -Path $adobeDC ) ){

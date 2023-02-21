@@ -25,10 +25,10 @@ if ($passFail)
   Remove-Variable oldPassword
   Remove-Variable newPassword
   Write-Host "Password has FAILED to update!"
-  sleep 1
+  Start-Sleep 1
   Write-Host "Please reach out to IT Support to have the password changed manually..."
   Write-Host "Closing..."
-  sleep 5
+  Start-Sleep 5
   exit
 }
 Else {
@@ -37,7 +37,7 @@ Else {
   #restart Global Protect VPN
   #Update Group Policy with new Password
   Write-Host "Password has been updated successfully!"
-  sleep 1
+  Start-Sleep 1
   Write-Host 'Updating Global Protect Credentials...'
   New-StoredCredential -Target gpcp/LatestCP -Username $user -Password $newPassword
   Write-Host 'Restarting Global Protect...'
@@ -47,13 +47,13 @@ Else {
   Stop-Process -Name 'PanGPS' -ErrorAction SilentlyContinue
   Stop-Process -Name 'PanGPA' -ErrorAction SilentlyContinue
   start-process -FilePath "C:\Program Files\Palo Alto Networks\GlobalProtect\PanGPA.exe"
-  sleep 10
+  Start-Sleep 10
   Read-Host -Prompt "Press enter to continue once Global Protect is Connected..."
-  sleep 1
+  Start-Sleep 1
   Write-Host 'Updating Group Policy...'
   Invoke-GPUpdate -Force
   Write-Host "Password Change Process has been Completed Successfully! Exiting..."
-  sleep 3
+  Start-Sleep 3
   exit
 }
 #In the event of a permission error accessing Set-ADAccountPassword
