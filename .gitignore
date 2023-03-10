@@ -3,3 +3,5 @@ MICROSOFT/ACTIVE DIRECTORY/change_password.ps1
 GUI SCRIPTS/gui_template.ps1
 MICROSOFT/WINDOWS/Windows11_Snip_Install.ps1
 MISC/DSC_Control.bat
+PALO ALTO NETWORKS/GLOBALPROTECT/Restart_Global_Protect.exe
+MICROSOFT/OFFICE/APPS
