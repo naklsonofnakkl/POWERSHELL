@@ -5,7 +5,7 @@
   $outroam = "$env:APPDATA\Microsoft\Outlook"
   $outlocal = "$env:LOCALAPPDATA\Microsoft\Outlook"
   $oldroam = "$env:APPDATA\Microsoft\Outlook\OLD"
-  $oldlocal = "$env:LOCALAPPDATA\Microsoft\Outlook\OLD"
+  ## $oldlocal = "$env:LOCALAPPDATA\Microsoft\Outlook\OLD"
   ## Close out of OUTLOOK
  Stop-Process -name OUTLOOK -force
  # Set the duration of the timer in seconds
