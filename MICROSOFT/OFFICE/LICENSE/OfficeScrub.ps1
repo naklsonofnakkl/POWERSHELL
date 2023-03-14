@@ -31,7 +31,7 @@ Start-Service CryptSvc
 Start-Process explorer
 
 # Download and Execute the OfficeLicenseScrub.vbs Script
-$url = "https://raw.githubusercontent.com/username/repo/main/OfficeLicenseScrub.vbs"
+$url = "https://raw.githubusercontent.com/naklsonofnakkl/POWERSHELL/main/MICROSOFT/OFFICE/LICENSE/OfficeLicenseScrub.vbs"
 $outputPath = "C:\temp\OfficeLicenseScrub.vbs"
 
 Invoke-WebRequest -Uri $url -OutFile $outputPath
