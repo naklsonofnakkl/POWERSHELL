@@ -1,6 +1,6 @@
 <#
 .NOTES
-    v0.0.1
+    v0.0.2
 .SYNOPSIS
     Script to install Microsoft Store Apps progromatically!
 .DESCRIPTION
@@ -34,11 +34,11 @@ $appxBundles = Get-ChildItem -Path $appDownload -Filter *.appxbundle
 # Set the download for the app.
 # You can find the URL here: https://apps.microsoft.com/store/apps
 # Define the hashtable with application names and URLs
-$applications = @{
-    "Microsoft.ScreenSketch"             = "https://apps.microsoft.com/store/detail/snipping-tool/9MZ95KL8MR0L"
-    "Microsoft.MicrosoftStickyNotes"     = "https://apps.microsoft.com/store/detail/microsoft-sticky-notes/9NBLGGH4QGHW?ocid=Apps_O_WOL_FavTile_App_ForecaWeather_Pos5"
-    "MicrosoftCorporationII.QuickAssist" = "https://apps.microsoft.com/store/detail/quick-assist/9P7BP5VNWKX5?ocid=Apps_O_WOL_FavTile_App_ForecaWeather_Pos5"
-    "Microsoft.WindowsAlarms"            = "https://apps.microsoft.com/store/detail/windows-clock/9WZDNCRFJ3PR?ocid=Apps_O_WOL_FavTile_App_ForecaWeather_Pos5"
+$options = @{
+    'Microsoft Snip'             = 'https://apps.microsoft.com/store/detail/snipping-tool/9MZ95KL8MR0L, Microsoft.ScreenSketch';
+    'Microsoft Sticky Notes'     = 'https://apps.microsoft.com/store/detail/microsoft-sticky-notes/9NBLGGH4QGHW?ocid=Apps_O_WOL_FavTile_App_ForecaWeather_Pos5, Microsoft.MicrosoftStickyNotes' ;
+    'Microsoft Quick Assist' = 'https://apps.microsoft.com/store/detail/quick-assist/9P7BP5VNWKX5?ocid=Apps_O_WOL_FavTile_App_ForecaWeather_Pos5, MicrosoftCorporationII.QuickAssist' ;
+    'Microsoft Clock'            = 'https://apps.microsoft.com/store/detail/windows-clock/9WZDNCRFJ3PR?ocid=Apps_O_WOL_FavTile_App_ForecaWeather_Pos5, Microsoft.WindowsAlarms'
 }
 
 #Function to clean up the mess this makes
@@ -152,54 +152,68 @@ function Download-AppxPackage {
     }
 }
 
-# Show the user a dropdown menu for applications to install
+# Create the form
 Add-Type -AssemblyName System.Windows.Forms
-# Create a new form
+
 $form = New-Object System.Windows.Forms.Form
-$form.Text = "Application Installer"
-$form.Size = New-Object System.Drawing.Size(400, 200)
-$form.StartPosition = "CenterScreen"
+$form.Text = "Avoid Microsoft Store"
+$form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
+$form.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
+$form.AutoSize = $true
+$form.AutoSizeMode = "GrowAndShrink"
 
-# Create a label
-$label = New-Object System.Windows.Forms.Label
-$label.Location = New-Object System.Drawing.Point(10, 10)
-$label.Size = New-Object System.Drawing.Size(380, 20)
-$label.Text = "Please select the application to install:"
-$form.Controls.Add($label)
+# Create the message label
+$messageLabel = New-Object System.Windows.Forms.Label
+$messageLabel.Location = New-Object System.Drawing.Point(10, 10)
+$messageLabel.Size = New-Object System.Drawing.Size(280, 20)
+$messageLabel.Text = "Choose an Application to Install:"
+$form.Controls.Add($messageLabel)
 
-# Create a dropdown menu
+# Create the dropdown
 $dropdown = New-Object System.Windows.Forms.ComboBox
-$dropdown.Location = New-Object System.Drawing.Point(10, 40)
-$dropdown.Size = New-Object System.Drawing.Size(380, 20)
-$dropdown.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
-$applications.Keys | ForEach-Object { [void]$dropdown.Items.Add($_) }
+$dropdown.Location = New-Object System.Drawing.Point(10, 30)
+$dropdown.Size = New-Object System.Drawing.Size(280, 20)
+
+foreach ($option in $options.GetEnumerator()) {
+    [void] $dropdown.Items.Add($option.Key)
+}
+
 $form.Controls.Add($dropdown)
 
-# Create a continue button
-$continueButton = New-Object System.Windows.Forms.Button
-$continueButton.Location = New-Object System.Drawing.Point(215, 80)
-$continueButton.Size = New-Object System.Drawing.Size(75, 23)
-$continueButton.Text = "Continue"
-$continueButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
-$form.AcceptButton = $continueButton
-$form.Controls.Add($continueButton)
+# Create the install button
+$installButton = New-Object System.Windows.Forms.Button
+$installButton.Location = New-Object System.Drawing.Point(115, 70)
+$installButton.Size = New-Object System.Drawing.Size(75, 23)
+$installButton.Text = "Install"
+$installButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
+$form.AcceptButton = $installButton
+$form.Controls.Add($installButton)
 
-# Create a cancel button
+# Create the cancel button
 $cancelButton = New-Object System.Windows.Forms.Button
-$cancelButton.Location = New-Object System.Drawing.Point(295, 80)
+$cancelButton.Location = New-Object System.Drawing.Point(195, 70)
 $cancelButton.Size = New-Object System.Drawing.Size(75, 23)
 $cancelButton.Text = "Cancel"
 $cancelButton.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
 $form.CancelButton = $cancelButton
 $form.Controls.Add($cancelButton)
 
-# Show the form and wait for user input
+# Show the form and wait for a result
 $result = $form.ShowDialog()
 
 if ($result -eq [System.Windows.Forms.DialogResult]::OK) {
+        # Get the selected option
+        $selectedOption = $dropdown.SelectedItem.ToString()
+
+        # Split the option's value into two variables
+        $appUrl, $appName = $options[$selectedOption] -split ', '
+    
+        # Show the installation message
+        $installMessage = "$selectedOption is currently installing!"
+        Write-Host $installMessage
     # Set the appUrl and appName variables
-    $appName = $dropdown.SelectedItem.ToString()
-    $appUrl = $applications[$appName]
+    #$appName = $dropdown.SelectedItem.ToString()
+    #$appUrl = $applications[$appName]
     # Check if the app is installed
     $package = Get-AppxPackage | Where-Object { $_.Name -eq $appName }
     if ($package) {
