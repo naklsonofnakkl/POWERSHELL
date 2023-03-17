@@ -5,6 +5,9 @@
 .NOTES
     Author: Andrew Wilson
     Version: 0.0.3
+    
+.LINK
+    https://github.com/naklsonofnakkl/POWERSHELL
 
 .SYNOPSIS
     Script to install Microsoft Store Apps without using the MS Store App!
@@ -16,8 +19,6 @@
     - Downoads necessary appbundle for installation
     - installs the requested Application
     - Cleans itself up
-.LINK
-    https://github.com/naklsonofnakkl/POWERSHELL
 #>
 
 # create a temp folder to download the app
