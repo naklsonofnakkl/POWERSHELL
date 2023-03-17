@@ -4,7 +4,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 0.0.3
+    Version: 0.0.4
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -21,8 +21,11 @@
     - Cleans itself up
 #>
 
-# create a temp folder to download the app
+
+# VARIBALE PARADISE!
+# create a temp folder
 # THIS IS WHERE LOGS WILL ALSO BE LOCATED!
+# C:\Users\[USERNAME]\AppData\Local\Temp\MSSTORE_temp
 $tempDir = New-Item -ItemType Directory -Path $env:TEMP -Name MSSTORE_temp -Force
 $appDownloadPath = $tempDir
 $appDownload = $appDownloadPath
@@ -49,64 +52,21 @@ $options = @{
     'Microsoft Clock'            = 'https://apps.microsoft.com/store/detail/windows-clock/9WZDNCRFJ3PR?ocid=Apps_O_WOL_FavTile_App_ForecaWeather_Pos5, Microsoft.WindowsAlarms'
 }
 
-#Function to clean up the mess this makes
-function Cleanup-Installation {
+# FUNCTION JUNCTION!
+# Function to clean up the leftover downloaded files
+function Clear-Installation {
     # Dispose of any forms
     $form.Dispose()
     $form.Close()
     Stop-Transcript
-    Move-Item -Path $appLogs -Destination "C:\" -Force -ErrorAction SilentlyContinue
     Get-ChildItem -Path $appDownloadPath -Include *.appx, *.appxbundle -Recurse | Remove-Item -Force
 }
-
-# Make sure you can even install apps
-# Add-WindowsCapability -Online -Name AppxVC
-
-# Check if the Appx module is already installed
-if (Get-Module -Name $moduleName -ListAvailable) {
-    Write-Host "$moduleName module is already installed!"
-    Write-Host "Moving right along now..."
-}
-else {
-    # popup variables based on pass or fail state
-    $appxFailTxt = "$moduleName must be updated or installed before the Application can continue!"
-    $appxPassTxt = "$moduleName module has been installed."
-    $appxFailBtn = New-Object System.Management.Automation.Host.ChoiceDescription "&OK", "OK"
-    $appxPassBtn = New-Object System.Management.Automation.Host.ChoiceDescription "&OK", "OK"
-    $appxFailRes = $Host.UI.PromptForChoice("Message", $appxFailTxt, @($appxFailBtn), 0)
-    $appxPassRes = $Host.UI.PromptForChoice("Message", $appxPassTxt, @($appxPassBtn), 0)
-
-    Add-Type -AssemblyName System.Windows.Forms
-    $messageBoxInput = New-Object System.Windows.Forms.MessageBoxButtons
-    $messageBoxInput.YesNo
-    $messageBoxResult = [System.Windows.Forms.MessageBox]::Show('$moduleName module is not installed. Do you want to install it? *Required!', 'Confirmation', $messageBoxInput)
-
-    if ($messageBoxResult -eq 'Yes') {
-        # Install the module
-        Install-Module $moduleName -Scope CurrentUser -Force
-        if (Get-Module -Name $moduleName -ListAvailable) {
-            Write-Host "$moduleName module has been installed!"
-            $appxPassRes
-        }
-        else {
-            $appxFailRes
-            Write-Host "$moduleName must be updated or installed before the Application can continue!" 
-            Cleanup-Installation
-        } 
-        else {
-            $appxFailRes
-            Write-Host "$moduleName must be updated or installed before the Application can continue!"
-            Cleanup-Installation 
-        }
-    }
-}
-Import-Module Appx
 
 # Function to download the correct AppPackage
 # Creator: https://serverfault.com/users/616108/yorai-levi
 # Source: https://serverfault.com/questions/1018220/how-do-i-install-an-app-from-windows-store-using-powershell
 
-function Download-AppxPackage {
+function Find-AppxPackage {
     [CmdletBinding()]
     param (
         [string]$Uri,
@@ -160,136 +120,199 @@ function Download-AppxPackage {
     }
 }
 
-# Create the form
-Add-Type -AssemblyName System.Windows.Forms
-
-$form = New-Object System.Windows.Forms.Form
-$form.Text = "Avoid Microsoft Store"
-$form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
-$form.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
-$form.AutoSize = $true
-$form.AutoSizeMode = "GrowAndShrink"
-
-# Create the message label
-$messageLabel = New-Object System.Windows.Forms.Label
-$messageLabel.Location = New-Object System.Drawing.Point(10, 10)
-$messageLabel.Size = New-Object System.Drawing.Size(280, 20)
-$messageLabel.Text = "Choose an Application to Install:"
-$form.Controls.Add($messageLabel)
-
-# Create the dropdown
-$dropdown = New-Object System.Windows.Forms.ComboBox
-$dropdown.Location = New-Object System.Drawing.Point(10, 30)
-$dropdown.Size = New-Object System.Drawing.Size(280, 20)
-
-foreach ($option in $options.GetEnumerator()) {
-    [void] $dropdown.Items.Add($option.Key)
-}
-
-$form.Controls.Add($dropdown)
-
-# Create the install button
-$installButton = New-Object System.Windows.Forms.Button
-$installButton.Location = New-Object System.Drawing.Point(115, 70)
-$installButton.Size = New-Object System.Drawing.Size(75, 23)
-$installButton.Text = "Install"
-$installButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
-$form.AcceptButton = $installButton
-$form.Controls.Add($installButton)
-
-# Create the cancel button
-$cancelButton = New-Object System.Windows.Forms.Button
-$cancelButton.Location = New-Object System.Drawing.Point(195, 70)
-$cancelButton.Size = New-Object System.Drawing.Size(75, 23)
-$cancelButton.Text = "Cancel"
-$cancelButton.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
-$form.CancelButton = $cancelButton
-$form.Controls.Add($cancelButton)
-
-# Show the form and wait for a result
-$result = $form.ShowDialog()
-
-if ($result -eq [System.Windows.Forms.DialogResult]::OK) {
-        # Get the selected option
-        $selectedOption = $dropdown.SelectedItem.ToString()
-
-        # Split the option's value into two variables
-        $appUrl, $appName = $options[$selectedOption] -split ', '
-    
-        # Show the installation message
-        $installMessage = "$selectedOption is currently installing!"
-        Write-Host $installMessage
-    # Set the appUrl and appName variables
-    #$appName = $dropdown.SelectedItem.ToString()
-    #$appUrl = $applications[$appName]
-    # Check if the app is installed
-    $package = Get-AppxPackage | Where-Object { $_.Name -eq $appName }
-    if ($package) {
-        Write-Host "$appName is already installed."
-        Add-Type -AssemblyName System.Windows.Forms
-        [System.Windows.Forms.MessageBox]::Show('Application is already installed!', 'Install Completed', 'OK', 'Information')
-        Cleanup-Installation
+# Check if the Appx module is already installed
+function Get-AppxModule {
+    if (Get-Module -Name $moduleName -ListAvailable) {
+        Write-Host "$moduleName module is already installed!"
+        Write-Host "Moving right along now..."
     }
     else {
-        Write-Host "$appName is not installed."
+        # popup variables based on pass or fail state
+        $appxFailTxt = "$moduleName must be updated or installed before the Application can continue!"
+        $appxPassTxt = "$moduleName module has been installed."
+        $appxFailBtn = New-Object System.Management.Automation.Host.ChoiceDescription "&OK", "OK"
+        $appxPassBtn = New-Object System.Management.Automation.Host.ChoiceDescription "&OK", "OK"
+        $appxFailRes = $Host.UI.PromptForChoice("Message", $appxFailTxt, @($appxFailBtn), 0)
+        $appxPassRes = $Host.UI.PromptForChoice("Message", $appxPassTxt, @($appxPassBtn), 0)
+
         Add-Type -AssemblyName System.Windows.Forms
-        Add-Type -AssemblyName System.Drawing
+        $messageBoxInput = New-Object System.Windows.Forms.MessageBoxButtons
+        $messageBoxInput.YesNo
+        $messageBoxResult = [System.Windows.Forms.MessageBox]::Show('$moduleName module is not installed. Do you want to install it? *Required!', 'Confirmation', $messageBoxInput)
 
-        $appcaption = "Confirmation"
-        $appmessage = "Do you want to install $appName ?"
-        $appicon = [System.Windows.Forms.MessageBoxIcon]::Question
-        $appbuttons = [System.Windows.Forms.MessageBoxButtons]::YesNo
-        $appresult = [System.Windows.Forms.MessageBox]::Show($appmessage, $appcaption, $appbuttons, $appicon)
-
-        # If the user selects Yes and continues with the installation    
-        if ($appresult -eq [System.Windows.Forms.DialogResult]::Yes) {
-            Write-Host "User clicked Yes"
-
-            # If the user didn't select cancel, retrieve the URL for the selected application and proceed with installation
-            if ($result -eq [System.Windows.Forms.DialogResult]::OK) {
-                Write-Host "You selected $appName. The download URL is $appUrl."
-
-                # Download the app files
-                Download-AppxPackage $appUrl $appDownloadPath
-
-                # Set downloaded files into a variable
-                $appxbundles = Get-ChildItem $appDownloadPath -Filter *.appxbundle
-                
-                # Install the selected app(s)
-                foreach ($appxbundle in $appxbundles) {
-                    Add-AppxPackage -Path $appxbundle.FullName
-                }
-                
+        if ($messageBoxResult -eq 'Yes') {
+            # Install the module
+            Install-Module $moduleName -Scope CurrentUser -Force
+            if (Get-Module -Name $moduleName -ListAvailable) {
+                Write-Host "$moduleName module has been installed!"
+                $appxPassRes
             }
-                # Validate if the application installed successfully
-                if (Get-AppxPackage -Name $appName) {
-                    Write-Host "$appName is installed."
-                    Add-Type -AssemblyName System.Windows.Forms
-                    [System.Windows.Forms.MessageBox]::Show('Application was successfully installed!', 'Install Completed', 'OK', 'Information')
-                    Cleanup-Installation
-                }
-                else {
-                    Write-Host "$appName is not installed."
-                    Add-Type -AssemblyName System.Windows.Forms
-                    $appErrorMessage = "$appName did not install correctly! Please view the log file for more details: C:\app.log"
-                    [System.Windows.Forms.MessageBox]::Show($appErrorMessage, 'Error', 'OK', [System.Windows.Forms.MessageBoxIcon]::Error)
-                    Cleanup-Installation
-                }
-        }
             else {
-                Write-Host "You canceled the installation."
-                Add-Type -AssemblyName System.Windows.Forms
-                $appCancelMessage = "$appName installation has been cancelled!"
-                [System.Windows.Forms.MessageBox]::Show($appCancelMessage, 'Error', 'OK', [System.Windows.Forms.MessageBoxIcon]::Error)
-                Cleanup-Installation
+                $appxFailRes
+                Write-Host "$moduleName must be updated or installed before the Application can continue!" 
+                Clear-Installation
+            } 
+            else {
+                $appxFailRes
+                Write-Host "$moduleName must be updated or installed before the Application can continue!"
+                Clear-Installation 
             }
         }
     }
-else {
-    Write-Host "User clicked No"
-    Add-Type -AssemblyName System.Windows.Forms
-    $appErrorMessage = "$appName install was declined. Appication will now close."
-    [System.Windows.Forms.MessageBox]::Show($appErrorMessage, 'Error', 'OK', [System.Windows.Forms.MessageBoxIcon]::Error)
-    Cleanup-Installation
 }
+
+# Function to prompt the user with a popup when install cancelled
+function Pop-Cancelled {
+    Add-Type -AssemblyName System.Windows.Forms
+                [System.Windows.Forms.MessageBox]::Show($global:output, 'Error', 'OK', [System.Windows.Forms.MessageBoxIcon]::Error)
+}
+
+# Function to prompt the user with a popup when install succeeds
+function Pop-Success {
+    Add-Type -AssemblyName System.Windows.Forms
+                    [System.Windows.Forms.MessageBox]::Show($global:output, 'Install Completed', 'OK', 'Information')
+}
+
+#Prompt the user to select an application to install
+function Show-AppInstallDialog {
+  
+    $global:output = ''
+    Add-Type -AssemblyName System.Windows.Forms
+    
+    $form = New-Object System.Windows.Forms.Form
+    $form.Text = "Avoid Microsoft Store"
+    $form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
+    $form.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
+    $form.AutoSize = $true
+    $form.AutoSizeMode = "GrowAndShrink"
+    
+    # Create the message label
+    $messageLabel = New-Object System.Windows.Forms.Label
+    $messageLabel.Location = New-Object System.Drawing.Point(10, 10)
+    $messageLabel.Size = New-Object System.Drawing.Size(280, 20)
+    $messageLabel.Text = "Choose an Application to Install:"
+    $form.Controls.Add($messageLabel)
+    
+    # Create the dropdown
+    $dropdown = New-Object System.Windows.Forms.ComboBox
+    $dropdown.Location = New-Object System.Drawing.Point(10, 30)
+    $dropdown.Size = New-Object System.Drawing.Size(280, 20)
+    
+    foreach ($option in $options.GetEnumerator()) {
+        [void] $dropdown.Items.Add($option.Key)
+    }
+    
+    $form.Controls.Add($dropdown)
+    
+    # Create the install button
+    $installButton = New-Object System.Windows.Forms.Button
+    $installButton.Location = New-Object System.Drawing.Point(115, 70)
+    $installButton.Size = New-Object System.Drawing.Size(75, 23)
+    $installButton.Text = "Install"
+    $installButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
+    $form.AcceptButton = $installButton
+    $form.Controls.Add($installButton)
+    
+    # Create the cancel button
+    $cancelButton = New-Object System.Windows.Forms.Button
+    $cancelButton.Location = New-Object System.Drawing.Point(195, 70)
+    $cancelButton.Size = New-Object System.Drawing.Size(75, 23)
+    $cancelButton.Text = "Cancel"
+    $cancelButton.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
+    $form.CancelButton = $cancelButton
+    $form.Controls.Add($cancelButton)
+    
+    # Show the form and wait for a result
+    $result = $form.ShowDialog()
+    
+    if ($result -eq [System.Windows.Forms.DialogResult]::OK) {
+
+        $selectedOption = $dropdown.SelectedItem.ToString()
+        # Split the option's value into two variables
+        $appUrl, $appName = $options[$selectedOption] -split ', '
+            # Show the installation message
+            $installMessage = "$selectedOption is currently installing!"
+            Write-Host $installMessage
+    
+        # Check if the app is installed
+        $package = Get-AppxPackage | Where-Object { $_.Name -eq $appName }
+        if ($package) {
+            $global:output = "$selectedOption is already installed!" 
+            Pop-Success
+            Clear-Installation
+        }
+        else {
+            Write-Host "$selectedOption is not installed."
+            Add-Type -AssemblyName System.Windows.Forms
+            Add-Type -AssemblyName System.Drawing
+    
+            $appcaption = "Confirmation"
+            $appmessage = "Do you want to install $selectedOption ?"
+            $appicon = [System.Windows.Forms.MessageBoxIcon]::Question
+            $appbuttons = [System.Windows.Forms.MessageBoxButtons]::YesNo
+            $appresult = [System.Windows.Forms.MessageBox]::Show($appmessage, $appcaption, $appbuttons, $appicon)
+    
+            # If the user selects Yes and continues with the installation    
+            if ($appresult -eq [System.Windows.Forms.DialogResult]::Yes) {
+                Write-Host "User clicked Yes"
+    
+                # If the user didn't select cancel, retrieve the URL for the selected application and proceed with installation
+                if ($result -eq [System.Windows.Forms.DialogResult]::OK) {
+                    Write-Host "You selected $appName. The download URL is $appUrl."
+    
+                    # Download the app files
+                    Find-AppxPackage $appUrl $appDownloadPath
+    
+                    # Set downloaded files into a variable
+                    $appxbundles = Get-ChildItem $appDownloadPath -Filter *.appxbundle
+                    
+                    # Install the selected app(s)
+                    foreach ($appxbundle in $appxbundles) {
+                        Add-AppxPackage -Path $appxbundle.FullName
+                    }
+                    
+                }
+                    # Validate if the application installed successfully
+                    if (Get-AppxPackage -Name $appName) {
+                        $global:output = "$selectedOption is installed."
+                        Pop-Success
+                        Clear-Installation
+                    }
+                    else {
+                        $global:output = "$selectedOption did not install correctly! Please view the log file for more details!"
+                        Pop-Cancelled
+                        Clear-Installation
+                    }
+            }
+                else {
+                    $global:output = "You canceled the installation."
+                    Pop-Cancelled
+                    Clear-Installation
+                }
+            }
+        }
+    else {
+        $global:output = "$selectedOption install was declined. Appication will now close."
+        Pop-Cancelled
+        Clear-Installation
+    }
+}
+
+
+<# 
+    This is the code used to validate you can install appx
+    applications at all, and if necessary, install the module
+    for you!
+#>
+Get-AppxModule
+Import-Module Appx
+
+
+<#
+This is the code used to prompt the user for the application to install,
+download the files based on the application(s) selected and automatically
+install it for them!
+#>
+Show-AppInstallDialog
+
 exit
