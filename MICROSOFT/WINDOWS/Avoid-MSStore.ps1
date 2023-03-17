@@ -1,14 +1,21 @@
+#Requires -Modules Appx
+#Requires -RunAsAdministrator
+
 <#
 .NOTES
-    v0.0.2
+    Author: Andrew Wilson
+    Version: 0.0.3
+
 .SYNOPSIS
-    Script to install Microsoft Store Apps progromatically!
+    Script to install Microsoft Store Apps without using the MS Store App!
 .DESCRIPTION
-    This script will install/import the Appx module
-    Import a function to download Appx Packages
-    check if the app you wish to install is either:
-    currently installed or needs to be installed
-    and then installs the application
+    - Creates a temporary folder
+    - install/import the Appx module (Required!)
+    - Prompt which app you wish to install from the $options list
+    - Validates the app isn't already installed
+    - Downoads necessary appbundle for installation
+    - installs the requested Application
+    - Cleans itself up
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
 #>
