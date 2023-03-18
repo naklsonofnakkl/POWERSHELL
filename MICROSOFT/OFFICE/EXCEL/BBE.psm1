@@ -14,7 +14,7 @@
     - a lot of damn functions
 #>
 
-function Add-ExcelModule {
+function Add-ModuleExcel {
 
     $moduleName = "ImportExcel"
 

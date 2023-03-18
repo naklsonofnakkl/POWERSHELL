@@ -31,7 +31,7 @@ Start-Transcript -Path $appLogs -Append
 $url = "https://raw.githubusercontent.com/naklsonofnakkl/POWERSHELL/main/MICROSOFT/OFFICE/EXCEL/BBE.psm1"
 $outputFile = "$appDownload\BBE.psm1"
 Invoke-WebRequest -Uri $url -OutFile $outputFile
-Import-Module $outputFile -Name Add-ExcelModule
+Import-Module $outputFile -Name Add-ModuleExcel
 Import-Module $outputFile -Name Format-SteamXlsx
 
 # FUNCTION JUNCTION!!
@@ -214,7 +214,7 @@ if ($Result -eq [System.Windows.Forms.DialogResult]::OK -and $ApiKeyTextBox.Text
         $owned_games | Export-Csv -Path "$appDownloadPath\steam_library_stats.csv" -NoTypeInformation
 #>
 
-        Add-ExcelModule
+        Add-ModuleExcel
         
         
     }
