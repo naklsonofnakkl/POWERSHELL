@@ -1,7 +1,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 0.0.4
+    Version: 0.0.5
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -14,30 +14,47 @@
     - a lot of damn functions
 #>
 
-function Format-SteamCsv {
+function Add-ExcelModule {
 
-# Install the ImportExcel module if it's not already installed
-Install-Module -Name ImportExcel
+    $moduleName = "ImportExcel"
 
-# Load the module into the current session
-Import-Module -Name ImportExcel
+    # Check if the module is installed
+    $installedModule = Get-Module -ListAvailable | Where-Object { $_.Name -eq $moduleName }
+    
+    if ($installedModule) {
+        Write-Host "The $moduleName module is installed."
+    
+        # Check if the module is currently imported
+        $importedModule = Get-Module -Name $moduleName -ListAvailable
+        # execute the rest of the script 
+        Join-JsonTable
+        & $formatExcel
+        Clear-Installation
+        Invoke-Item -Path $appDownloadPath
+    }
+    else {
+        Write-Host "The $moduleName module is not installed."
+        # Install the missing module and run the rest of the script
+        Get-NuGet
+        Join-JsonTable
+        & $formatExcel
+        Clear-Installation
+        Invoke-Item -Path $appDownloadPath
+    }
 
-# Import CSV file
-$data = Import-Csv -Path "$env:TEMP\SteamLib_temp\steam_library_stats.csv"
+} 
 
-# Export data to XLSX file
-$data | Export-Excel -Path "$env:TEMP\SteamLib_temp\steam_library_stats.xlsx" -AutoSize -AutoFilter
+function Format-SteamXlsx {
+    # Define the path to your Excel file
+    $excelFilePath = "$env:TEMP\SteamLib_temp\steam_library_stats.xlsx"
 
-# Define the path to your Excel file
-$excelFilePath = "$env:TEMP\SteamLib_temp\steam_library_stats.xlsx"
+    # Load the Excel data into a PowerShell object
+    $condata = Import-Excel -Path $excelFilePath
 
-# Load the Excel data into a PowerShell object
-$condata = Import-Excel -Path $excelFilePath
+    # Filter the data to only include rows where the fifth column contains "true"
+    $condata = $condata | Where-Object { $_.Column5 -eq "TRUE" }
 
-# Filter the data to only include rows where the fifth column contains "true"
-$condata = $condata | Where-Object { $_.Column5 -eq "true" }
-
-# Export the filtered data to a new Excel file
-$filteredExcelFilePath = "$env:TEMP\SteamLib_temp\Steam_Multiplayer.xlsx"
-$condata | Export-Excel -Path $filteredExcelFilePath -NoHeader -AutoSize
-    } 
+    # Export the filtered data to a new Excel file
+    $filteredExcelFilePath = "$env:TEMP\SteamLib_temp\Steam_Multiplayer.xlsx"
+    $condata | Export-Excel -Path $filteredExcelFilePath -NoHeader -AutoSize
+}

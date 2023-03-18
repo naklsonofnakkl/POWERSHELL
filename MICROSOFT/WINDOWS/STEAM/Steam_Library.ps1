@@ -1,7 +1,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 0.0.4
+    Version: 0.0.5
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -33,6 +33,9 @@ $outputFile = "$appDownload\BBE.psm1"
 Invoke-WebRequest -Uri $url -OutFile $outputFile
 Import-Module $outputFile
 
+#set functions as variables for easier use in poorly written code 
+$formatExcel = Get-Command -Name Format-SteamXlsx -Module $outputFile
+
 # FUNCTION JUNCTION!!
 function Clear-Installation {
     # Dispose of any forms
@@ -45,7 +48,7 @@ function Clear-Installation {
     # Loop through each file
     foreach ($file in $files) {
         # Check if the file is not the one you want to keep
-        if ($file.Name -ne "Steam_Multiplayer.csv" -and $file.Name -ne "SteamLib.log") {
+        if ($file.Name -ne "Steam_Multiplayer.xlsx" -and $file.Name -ne "SteamLib.log") {
             # Delete the file
             Remove-Item $file.FullName
         }
@@ -54,14 +57,50 @@ function Clear-Installation {
 
 function Get-NuGet {
     $packageName = "NuGet"
-    $version = "2.8.5.201"
-    if (Get-Package -Name $packageName -ErrorAction SilentlyContinue | Where-Object { $_.Version -eq $version }){
+    $version = "2.8.5.208"
+    if (Get-Package -Name $packageName -ErrorAction SilentlyContinue | Where-Object { $_.Version -eq $version }) {
         Write-Host "NuGet is Installed!"
-    } else {
-        Write-Host "Installing NuGet!"
-    Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-    Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
     }
+    else {
+        Write-Host "Installing NuGet!"
+        Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+        Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
+    }
+}
+
+function Join-JsonTable {
+
+    
+    # Install the ImportExcel and PSWriteExcel modules if they're not already installed
+    Install-Module -Name ImportExcel, PSWriteExcel
+
+    # Load the modules into the current session
+    Import-Module -Name ImportExcel, PSWriteExcel
+
+    # Define the URL of the JSON data
+    $jsonUrl = $owned_games
+
+    # Import the JSON data
+    $jsonData = Invoke-RestMethod -Uri $jsonUrl
+
+    # Convert the JSON data to a PowerShell object
+    $data = ConvertFrom-Json -InputObject $jsonData
+
+    # Export the data to an Excel file
+    $excelFilePath = "$appDownloadPath\steam_library_stats.xlsx"
+    $data | Export-Excel -Path $excelFilePath -AutoSize -AutoFilter
+
+}
+
+# Function to check if a game has community visible stats
+function HasCommunityVisibleStats($app_id) {
+    $store_url = "https://store.steampowered.com/api/appdetails?appids=$app_id"
+    $store_response = Invoke-RestMethod -Uri $store_url
+    $details = $store_response.$app_id.data
+    if ($details.categories.description -contains "Stats") {
+        return $details.has_community_visible_stats
+    }
+    return $false
 }
 
 #This is a form to ask for the users API and SteamID
@@ -172,26 +211,16 @@ if ($Result -eq [System.Windows.Forms.DialogResult]::OK -and $ApiKeyTextBox.Text
         $owned_games = $owned_games_response.response.games
         Write-Host "I HAS THE GAMES!"
 
-        # Function to check if a game has community visible stats
-        function HasCommunityVisibleStats($app_id) {
-            $store_url = "https://store.steampowered.com/api/appdetails?appids=$app_id"
-            $store_response = Invoke-RestMethod -Uri $store_url
-            $details = $store_response.$app_id.data
-            if ($details.categories.description -contains "Stats") {
-                return $details.has_community_visible_stats
-            }
-            return $false
-        }
-
+        <#
         # Export the game data to a CSV file
-        $owned_games | Export-Csv -Path "$appDownloadPath\steam_library_stats.xlsx" -NoTypeInformation
+        $owned_games | Export-Csv -Path "$appDownloadPath\steam_library_stats.csv" -NoTypeInformation
+#>
 
-        Get-NuGet
-        Format-SteamCsv
-        Invoke-Item -Path $appDownloadPath
-        Clear-Installation
+        Add-ExcelModule
+        
+        
     }
-
+    Clear-Installation
 }
 
 
