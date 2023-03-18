@@ -171,9 +171,9 @@ if ($Result -eq [System.Windows.Forms.DialogResult]::OK -and $ApiKeyTextBox.Text
 
         # Export the game data to a CSV file
         $owned_games | Export-Csv -Path "$appDownloadPath\steam_library_stats.csv" -NoTypeInformation
-        $form.Dispose()
-        $form.Close()
+
         Format-SteamCsv
+        Clear-Installation
     }
 
 }

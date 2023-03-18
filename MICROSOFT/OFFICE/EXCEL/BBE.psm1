@@ -24,8 +24,8 @@ function Format-SteamCsv {
         $data = Import-Csv $csvFilePath
 
         #Filter the data to only include rows with "true" in the 5th column
-        $data = $data | Where-Object { $_.Column5 -eq "true" }
+        $dataSorted = $data | Where-Object { $_.Column5 -eq "true" }
 
         #Export the updated data to a new CSV file
-        $data | Export-Csv $outputFilePath -NoTypeInformation
+        $dataSorted | Export-Csv $outputFilePath -NoTypeInformation
     } 
