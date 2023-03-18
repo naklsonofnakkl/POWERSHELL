@@ -23,34 +23,34 @@ function Format-SteamCsv {
     # Define the $yourName varible via a text prompt
     Add-Type -AssemblyName System.Windows.Forms
 
-    $Form = New-Object System.Windows.Forms.Form
-    $Form.Text = "Enter Your Username"
-    $Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
-    $Form.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
-    $Form.AutoSize = $true
-    $Form.AutoSizeMode = "GrowAndShrink"
+    $subForm = New-Object System.Windows.Forms.Form
+    $subForm.Text = "Enter Your Username"
+    $subForm.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
+    $subForm.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
+    $subForm.AutoSize = $true
+    $subForm.AutoSizeMode = "GrowAndShrink"
 
     # Create the message label
-    $MessageLabel = New-Object System.Windows.Forms.Label
-    $MessageLabel.Location = New-Object System.Drawing.Point(10, 10)
-    $MessageLabel.Size = New-Object System.Drawing.Size(280, 20)
-    $MessageLabel.Text = "Please enter your Online Alias:"
-    $Form.Controls.Add($MessageLabel)
+    $subMessageLabel = New-Object System.Windows.Forms.Label
+    $subMessageLabel.Location = New-Object System.Drawing.Point(10, 10)
+    $subMessageLabel.Size = New-Object System.Drawing.Size(280, 20)
+    $subMessageLabel.Text = "Please enter your Online Alias:"
+    $subForm.Controls.Add($subMessageLabel)
 
     # Create the API Key textbox
     $yourNameTextBox = New-Object System.Windows.Forms.TextBox
     $yourNameTextBox.Location = New-Object System.Drawing.Point(10, 30)
     $yourNameTextBox.Size = New-Object System.Drawing.Size(280, 20)
-    $Form.Controls.Add($yourNameTextBox)
+    $subForm.Controls.Add($yourNameTextBox)
 
     # Create the "Submit" button
-    $SubButton = New-Object System.Windows.Forms.Button
-    $SubButton.Location = New-Object System.Drawing.Point(115, 70)
-    $SubButton.Size = New-Object System.Drawing.Size(75, 23)
-    $SubButton.Text = "Submit"
-    $SubButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
-    $Form.AcceptButton = $SubButton
-    $Form.Controls.Add($SubButton)
+    $subButton = New-Object System.Windows.Forms.Button
+    $subButton.Location = New-Object System.Drawing.Point(115, 70)
+    $subButton.Size = New-Object System.Drawing.Size(75, 23)
+    $subButton.Text = "Submit"
+    $subButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
+    $subForm.AcceptButton = $subButton
+    $subForm.Controls.Add($subButton)
 
     # Show the form and wait for a result
     $Result = $Form.ShowDialog()

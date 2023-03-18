@@ -33,6 +33,24 @@ $outputFile = "$appDownload\BBE.psm1"
 Invoke-WebRequest -Uri $url -OutFile $outputFile
 Import-Module $outputFile
 
+# FUNCTION JUNCTION!!
+function Clear-Installation {
+    # Dispose of any forms
+    $form.Dispose()
+    $form.Close()
+    Stop-Transcript
+    # Get all the files in the directory
+    $files = Get-ChildItem $appDownloadpath
+
+    # Loop through each file
+    foreach ($file in $files) {
+        # Check if the file is not the one you want to keep
+        if ($file.Name -ne "$Format-SteamCsv\$yourName.csv" -and $file.Name -ne "SteamLib.log") {
+            # Delete the file
+            Remove-Item $file.FullName
+        }
+    }
+}
 
 #This is a form to ask for the users API and SteamID
 Add-Type -AssemblyName System.Windows.Forms
@@ -68,7 +86,7 @@ $Form.AcceptButton = $NextButton
 $Form.Controls.Add($NextButton)
 
 # Create the event handler for the API Key textbox
- $ApiKeyTextBox.add_TextChanged({
+$ApiKeyTextBox.add_TextChanged({
         if ($ApiKeyTextBox.Text.Length -eq 32) {
             $NextButton.Enabled = $true
         }
@@ -153,7 +171,8 @@ if ($Result -eq [System.Windows.Forms.DialogResult]::OK -and $ApiKeyTextBox.Text
 
         # Export the game data to a CSV file
         $owned_games | Export-Csv -Path "$appDownloadPath\steam_library_stats.csv" -NoTypeInformation
-
+        $form.Dispose()
+        $form.Close()
         Format-SteamCsv
     }
 
