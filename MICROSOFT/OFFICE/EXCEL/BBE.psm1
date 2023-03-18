@@ -28,6 +28,4 @@ function Format-SteamCsv {
 
         #Export the updated data to a new CSV file
         $data | Export-Csv $outputFilePath -NoTypeInformation
-    } else { 
-        exit
-    }
+    } 
