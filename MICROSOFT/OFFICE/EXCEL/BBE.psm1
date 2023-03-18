@@ -48,7 +48,6 @@ function Format-SteamCsv {
     $SubmitButton.Location = New-Object System.Drawing.Point(115, 70)
     $SubmitButton.Size = New-Object System.Drawing.Size(75, 23)
     $SubmitButton.Text = "Submit"
-    $SubmitButton.Enabled = $true
     $SubmitButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
     $Form.AcceptButton = $NSubmitButton
     $Form.Controls.Add($SubmitButton)
