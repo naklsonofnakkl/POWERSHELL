@@ -29,17 +29,12 @@ Start-Transcript -Path $appLogs -Append
 
 # Modules to Import!
 $url = "https://raw.githubusercontent.com/naklsonofnakkl/POWERSHELL/main/MICROSOFT/OFFICE/EXCEL/BBE.psm1"
-$outputFile = "BBE.psm1"
+$outputFile = "$appDownload\BBE.psm1"
 Invoke-WebRequest -Uri $url -OutFile $outputFile
 Import-Module $outputFile
 
 
-
-
-
-
-
-
+#This is a form to ask for the users API and SteamID
 Add-Type -AssemblyName System.Windows.Forms
 
 $Form = New-Object System.Windows.Forms.Form
