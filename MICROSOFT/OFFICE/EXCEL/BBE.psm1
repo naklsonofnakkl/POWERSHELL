@@ -1,7 +1,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 0.0.2
+    Version: 0.0.3
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -16,16 +16,22 @@
 
 function Format-SteamCsv {
 
-    #set the output paths
-    $csvFilePath = "$env:TEMP\SteamLib_temp\steam_library_stats.csv"
-    $outputFilePath = "$env:TEMP\SteamLib_temp\Steam_Multiplayer.csv"
+    # Install the ImportExcel module if it's not already installed
+Install-Module -Name ImportExcel
 
-        # Import the CSV file
-        $data = Import-Csv $csvFilePath
+# Load the module into the current session
+Import-Module -Name ImportExcel
 
-        #Filter the data to only include rows with "true" in the 5th column
-        $dataSorted = $data | Where-Object { $_.Column5 -eq "true" }
+# Define the path to your Excel file
+$excelFilePath = "$env:TEMP\SteamLib_temp\steam_library_stats.csv"
 
-        #Export the updated data to a new CSV file
-        $dataSorted | Export-Csv $outputFilePath -NoTypeInformation
+# Load the Excel data into a PowerShell object
+$data = Import-Excel -Path $excelFilePath
+
+# Filter the data to only include rows where the fifth column contains "true"
+$data = $data | Where-Object { $_.Column5 -eq "true" }
+
+# Export the filtered data to a new Excel file
+$filteredExcelFilePath = "$env:TEMP\SteamLib_temp\Steam_Multiplayer.csv"
+$data | Export-Excel -Path $filteredExcelFilePath -NoHeader -AutoSize
     } 

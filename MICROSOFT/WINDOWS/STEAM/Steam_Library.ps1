@@ -1,7 +1,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 0.0.2
+    Version: 0.0.3
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -60,6 +60,7 @@ $Form.Text = "Enter API Key"
 $Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
 $Form.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
 $Form.AutoSize = $true
+$form.TopMost = $true
 $Form.AutoSizeMode = "GrowAndShrink"
 
 # Create the message label
@@ -109,6 +110,7 @@ if ($Result -eq [System.Windows.Forms.DialogResult]::OK -and $ApiKeyTextBox.Text
     $Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
     $Form.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
     $Form.AutoSize = $true
+    $form.TopMost = $true
     $Form.AutoSizeMode = "GrowAndShrink"
 
     # Create the message label
@@ -173,6 +175,7 @@ if ($Result -eq [System.Windows.Forms.DialogResult]::OK -and $ApiKeyTextBox.Text
         $owned_games | Export-Csv -Path "$appDownloadPath\steam_library_stats.csv" -NoTypeInformation
 
         Format-SteamCsv
+        Invoke-Item -Path $appDownloadPath
         Clear-Installation
     }
 
