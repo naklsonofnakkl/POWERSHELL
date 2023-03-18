@@ -1,7 +1,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 0.0.5
+    Version: 0.0.6
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -23,9 +23,7 @@ function Add-ExcelModule {
     
     if ($installedModule) {
         Write-Host "The $moduleName module is installed."
-    
-        # Check if the module is currently imported
-        $importedModule = Get-Module -Name $moduleName -ListAvailable
+
         # execute the rest of the script 
         Join-JsonTable
         Format-SteamXlsx

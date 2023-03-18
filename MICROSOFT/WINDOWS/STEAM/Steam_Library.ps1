@@ -1,7 +1,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 0.0.5
+    Version: 0.0.6
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -31,7 +31,8 @@ Start-Transcript -Path $appLogs -Append
 $url = "https://raw.githubusercontent.com/naklsonofnakkl/POWERSHELL/main/MICROSOFT/OFFICE/EXCEL/BBE.psm1"
 $outputFile = "$appDownload\BBE.psm1"
 Invoke-WebRequest -Uri $url -OutFile $outputFile
-Import-Module $outputFile
+Import-Module $outputFile -Name Add-ExcelModule
+Import-Module $outputFile -Name Format-SteamXlsx
 
 # FUNCTION JUNCTION!!
 function Clear-Installation {
