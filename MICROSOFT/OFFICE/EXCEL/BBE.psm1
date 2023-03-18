@@ -44,18 +44,18 @@ function Format-SteamCsv {
     $Form.Controls.Add($yourNameTextBox)
 
     # Create the "Submit" button
-    $SubmitButton = New-Object System.Windows.Forms.Button
-    $SubmitButton.Location = New-Object System.Drawing.Point(115, 70)
-    $SubmitButton.Size = New-Object System.Drawing.Size(75, 23)
-    $SubmitButton.Text = "Submit"
-    $SubmitButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
-    $Form.AcceptButton = $SubmitButton
-    $Form.Controls.Add($SubmitButton)
+    $SubButton = New-Object System.Windows.Forms.Button
+    $SubButton.Location = New-Object System.Drawing.Point(115, 70)
+    $SubButton.Size = New-Object System.Drawing.Size(75, 23)
+    $SubButton.Text = "Submit"
+    $SubButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
+    $Form.AcceptButton = $SubButton
+    $Form.Controls.Add($SubButton)
 
     # Show the form and wait for a result
     $Result = $Form.ShowDialog()
 
-    # If the "Next" button was clicked and the API Key is 32 characters long, set the $yourName variable
+    # If the "submit" button was clicked and the API Key is 32 characters long, set the $yourName variable
     if ($Result -eq [System.Windows.Forms.DialogResult]::OK) {
         $yourName = $yourNameTextBox.Text
 
