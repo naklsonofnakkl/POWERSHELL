@@ -1,7 +1,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 0.0.3
+    Version: 0.0.4
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -49,6 +49,18 @@ function Clear-Installation {
             # Delete the file
             Remove-Item $file.FullName
         }
+    }
+}
+
+function Get-NuGet {
+    $packageName = "NuGet"
+    $version = "2.8.5.201"
+    if (Get-Package -Name $packageName -ErrorAction SilentlyContinue | Where-Object { $_.Version -eq $version }){
+        Write-Host "NuGet is Installed!"
+    } else {
+        Write-Host "Installing NuGet!"
+    Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+    Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
     }
 }
 
@@ -172,8 +184,9 @@ if ($Result -eq [System.Windows.Forms.DialogResult]::OK -and $ApiKeyTextBox.Text
         }
 
         # Export the game data to a CSV file
-        $owned_games | Export-Csv -Path "$appDownloadPath\steam_library_stats.csv" -NoTypeInformation
+        $owned_games | Export-Csv -Path "$appDownloadPath\steam_library_stats.xlsx" -NoTypeInformation
 
+        Get-NuGet
         Format-SteamCsv
         Invoke-Item -Path $appDownloadPath
         Clear-Installation
