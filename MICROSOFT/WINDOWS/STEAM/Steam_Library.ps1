@@ -1,7 +1,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 0.0.1
+    Version: 0.0.2
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -45,7 +45,7 @@ function Clear-Installation {
     # Loop through each file
     foreach ($file in $files) {
         # Check if the file is not the one you want to keep
-        if ($file.Name -ne "$Format-SteamCsv\$yourName.csv" -and $file.Name -ne "SteamLib.log") {
+        if ($file.Name -ne "Steam_Multiplayer.csv" -and $file.Name -ne "SteamLib.log") {
             # Delete the file
             Remove-Item $file.FullName
         }
