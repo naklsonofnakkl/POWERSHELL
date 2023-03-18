@@ -33,9 +33,6 @@ $outputFile = "$appDownload\BBE.psm1"
 Invoke-WebRequest -Uri $url -OutFile $outputFile
 Import-Module $outputFile
 
-#set functions as variables for easier use in poorly written code 
-$formatExcel = Get-Command -Name Format-SteamXlsx -Module $outputFile
-
 # FUNCTION JUNCTION!!
 function Clear-Installation {
     # Dispose of any forms

@@ -28,7 +28,7 @@ function Add-ExcelModule {
         $importedModule = Get-Module -Name $moduleName -ListAvailable
         # execute the rest of the script 
         Join-JsonTable
-        & $formatExcel
+        Format-SteamXlsx
         Clear-Installation
         Invoke-Item -Path $appDownloadPath
     }
@@ -37,7 +37,7 @@ function Add-ExcelModule {
         # Install the missing module and run the rest of the script
         Get-NuGet
         Join-JsonTable
-        & $formatExcel
+        Format-SteamXlsx
         Clear-Installation
         Invoke-Item -Path $appDownloadPath
     }
