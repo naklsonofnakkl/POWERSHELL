@@ -53,10 +53,10 @@ function Format-SteamCsv {
     $subForm.Controls.Add($subButton)
 
     # Show the form and wait for a result
-    $Result = $Form.ShowDialog()
+    $subResult = $Form.ShowDialog()
 
     # If the "submit" button was clicked and the API Key is 32 characters long, set the $yourName variable
-    if ($Result -eq [System.Windows.Forms.DialogResult]::OK) {
+    if ($subResult -eq [System.Windows.Forms.DialogResult]::OK) {
         $yourName = $yourNameTextBox.Text
 
         # Import the CSV file
