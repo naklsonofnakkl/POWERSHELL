@@ -28,7 +28,11 @@ $ErrorActionPreference = "Stop"
 Start-Transcript -Path $appLogs -Append
 
 # Modules to Import!
-Import-Module -Name https://
+$url = "https://raw.githubusercontent.com/naklsonofnakkl/POWERSHELL/main/MICROSOFT/OFFICE/EXCEL/BBE.psm1"
+$outputFile = "BBE.psm1"
+Invoke-WebRequest -Uri $url -OutFile $outputFile
+Import-Module $outputFile
+
 
 
 
