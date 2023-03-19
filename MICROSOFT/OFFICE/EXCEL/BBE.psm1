@@ -1,7 +1,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 0.0.6
+    Version: 0.0.7
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -13,34 +13,6 @@
     - Can't even justify it really, just need to call 
     - a lot of damn functions
 #>
-
-function Add-ModuleExcel {
-
-    $moduleName = "ImportExcel"
-
-    # Check if the module is installed
-    $installedModule = Get-Module -ListAvailable | Where-Object { $_.Name -eq $moduleName }
-    
-    if ($installedModule) {
-        Write-Host "The $moduleName module is installed."
-
-        # execute the rest of the script 
-        Join-JsonTable
-        Format-SteamXlsx
-        Clear-Installation
-        Invoke-Item -Path $appDownloadPath
-    }
-    else {
-        Write-Host "The $moduleName module is not installed."
-        # Install the missing module and run the rest of the script
-        Get-NuGet
-        Join-JsonTable
-        Format-SteamXlsx
-        Clear-Installation
-        Invoke-Item -Path $appDownloadPath
-    }
-
-} 
 
 function Format-SteamXlsx {
     # Define the path to your Excel file
