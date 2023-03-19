@@ -3,7 +3,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 1.1.1.8
+    Version: 1.1.2.0
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
 
@@ -42,6 +42,17 @@ $username = Split-Path $env:USERPROFILE -Leaf
 # FUNCTION JUNCTION!!
 
 # Function that runs whenever script ends
+
+<#
+Function Find-AWSPowerShell {
+    # Check if the AWSPowershell Module is installed
+    if (-not(Get-Module -Name AWSPowershell -ListAvailable)) {
+        # Install the Module
+        Install-Module -Name AWSPowershell -Scope CurrentUser -Force
+    } 
+}
+#>
+
 function Clear-Installation {
     # Dispose of any forms
     $form.Dispose()
@@ -60,18 +71,6 @@ function Clear-Installation {
     }
 }
 
-#Install NuGet if it isn't already installed
-function Get-NuGet {
-    $packageName = "NuGet"
-    $version = "2.8.5.208"
-    if (Get-Package -Name $packageName -ErrorAction SilentlyContinue | Where-Object { $_.Version -eq $version }) {
-    }
-    else {
-        Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-        Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
-    }
-}
-
 # install modules, import them and then export JSON file
 function Join-JsonTable {
     # Import the JSON data
@@ -79,32 +78,6 @@ function Join-JsonTable {
     $owned_games_Json = "$tempDir\$username.json"
     Invoke-WebRequest -Uri $Json_Url -OutFile $owned_games_Json
 }
-
-function Get-ModuleExcel {
-    # Install the ImportExcel and PSWriteExcel modules if they're not already installed
-    Install-Module -Name ImportExcel, PSWriteExcel
-    # Load the modules into the current session
-    Import-Module -Name ImportExcel, PSWriteExcel
-}
-
-# validate if ImportExcel is available, otherwise install Nuget
-function Find-ModuleExcel {
-
-    $moduleName = "ImportExcel"
-    
-    # Check if the module is installed
-    $installedModule = Get-Module -ListAvailable | Where-Object { $_.Name -eq $moduleName }
-        
-    if ($installedModule) {
-        # execute the rest of the script 
-    }
-    else {
-        # Install the missing module and run the rest of the script
-        Get-NuGet
-        Get-ModuleExcel
-    }
-    
-} 
 
 
 #This is a form to ask for the users API and SteamID
@@ -208,11 +181,26 @@ if ($Result -eq [System.Windows.Forms.DialogResult]::OK -and $ApiKeyTextBox.Text
         $SteamID64 = $SteamID64TextBox.Text
         #URL for API
         $apiUrl = "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=$Apikey&steamid=$SteamID64&include_appinfo=1&format=json"
+        
         # Grabs the list of Steam Games
-        Find-ModuleExcel
-
         # Export the JSON file
         Join-JsonTable
+<#
+        # Check that AWSPowershell module is installed
+        Find-AWSPowerShell
+
+        # Import the AWSPowershell Module
+        Import-AWSPowershell
+
+        #Set the name of S3 bucket
+        $bucketname = ""
+        $localFilePath = $tempDir
+        $keyname = ""
+
+        # Upload to S3
+
+
+#>        
         # Open up file explorer for user
         Invoke-Item -Path $tempDir
 
