@@ -3,7 +3,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 1.1.1.7
+    Version: 1.1.1.8
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
 
@@ -108,13 +108,61 @@ function Find-ModuleExcel {
     
 } 
 
-# Prompt the user for the API and SteamID64 keys
-function Get-ApiAccess {
-    #This is a form to ask for the users API and SteamID
+
+#This is a form to ask for the users API and SteamID
+Add-Type -AssemblyName System.Windows.Forms
+
+$Form = New-Object System.Windows.Forms.Form
+$Form.Text = "Enter API Key"
+$Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
+$Form.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
+$Form.AutoSize = $true
+$form.TopMost = $true
+$Form.AutoSizeMode = "GrowAndShrink"
+
+# Create the message label
+$MessageLabel = New-Object System.Windows.Forms.Label
+$MessageLabel.Location = New-Object System.Drawing.Point(10, 10)
+$MessageLabel.Size = New-Object System.Drawing.Size(280, 20)
+$MessageLabel.Text = "Please enter your API Key (must be 32 characters):"
+$Form.Controls.Add($MessageLabel)
+
+# Create the API Key textbox
+$ApiKeyTextBox = New-Object System.Windows.Forms.TextBox
+$ApiKeyTextBox.Location = New-Object System.Drawing.Point(10, 30)
+$ApiKeyTextBox.Size = New-Object System.Drawing.Size(280, 20)
+$Form.Controls.Add($ApiKeyTextBox)
+
+# Create the "Next" button
+$NextButton = New-Object System.Windows.Forms.Button
+$NextButton.Location = New-Object System.Drawing.Point(115, 70)
+$NextButton.Size = New-Object System.Drawing.Size(75, 23)
+$NextButton.Text = "Next"
+$NextButton.Enabled = $false
+$NextButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
+$Form.AcceptButton = $NextButton
+$Form.Controls.Add($NextButton)
+
+# Create the event handler for the API Key textbox
+$ApiKeyTextBox.add_TextChanged({
+        if ($ApiKeyTextBox.Text.Length -eq 32) {
+            $NextButton.Enabled = $true
+        }
+        else {
+            $NextButton.Enabled = $false
+        }
+    })
+
+# Show the form and wait for a result
+$Result = $Form.ShowDialog()
+
+# If the "Next" button was clicked and the API Key is 32 characters long, set the $ApiKey variable
+if ($Result -eq [System.Windows.Forms.DialogResult]::OK -and $ApiKeyTextBox.Text.Length -eq 32) {
+    $Apikey = $ApiKeyTextBox.Text
     Add-Type -AssemblyName System.Windows.Forms
 
     $Form = New-Object System.Windows.Forms.Form
-    $Form.Text = "Enter API Key"
+    $Form.Text = "Enter SteamID64"
     $Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
     $Form.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
     $Form.AutoSize = $true
@@ -125,14 +173,14 @@ function Get-ApiAccess {
     $MessageLabel = New-Object System.Windows.Forms.Label
     $MessageLabel.Location = New-Object System.Drawing.Point(10, 10)
     $MessageLabel.Size = New-Object System.Drawing.Size(280, 20)
-    $MessageLabel.Text = "Please enter your API Key (must be 32 characters):"
+    $MessageLabel.Text = "Please enter your SteamID64 (must be 17 characters):"
     $Form.Controls.Add($MessageLabel)
 
     # Create the API Key textbox
-    $ApiKeyTextBox = New-Object System.Windows.Forms.TextBox
-    $ApiKeyTextBox.Location = New-Object System.Drawing.Point(10, 30)
-    $ApiKeyTextBox.Size = New-Object System.Drawing.Size(280, 20)
-    $Form.Controls.Add($ApiKeyTextBox)
+    $SteamID64TextBox = New-Object System.Windows.Forms.TextBox
+    $SteamID64TextBox.Location = New-Object System.Drawing.Point(10, 30)
+    $SteamID64TextBox.Size = New-Object System.Drawing.Size(280, 20)
+    $Form.Controls.Add($SteamID64TextBox)
 
     # Create the "Next" button
     $NextButton = New-Object System.Windows.Forms.Button
@@ -145,8 +193,8 @@ function Get-ApiAccess {
     $Form.Controls.Add($NextButton)
 
     # Create the event handler for the API Key textbox
-    $ApiKeyTextBox.add_TextChanged({
-            if ($ApiKeyTextBox.Text.Length -eq 32) {
+    $SteamID64TextBox.add_TextChanged({
+            if ($SteamID64TextBox.Text.Length -eq 17) {
                 $NextButton.Enabled = $true
             }
             else {
@@ -158,85 +206,27 @@ function Get-ApiAccess {
     $Result = $Form.ShowDialog()
 
     # If the "Next" button was clicked and the API Key is 32 characters long, set the $ApiKey variable
-    if ($Result -eq [System.Windows.Forms.DialogResult]::OK -and $ApiKeyTextBox.Text.Length -eq 32) {
-        $Apikey = $ApiKeyTextBox.Text
-        Add-Type -AssemblyName System.Windows.Forms
+    if ($Result -eq [System.Windows.Forms.DialogResult]::OK -and $SteamID64TextBox.Text.Length -eq 17) {
+        $SteamID64 = $SteamID64TextBox.Text
+        #URL for API
+        $apiUrl = "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=$Apikey&steamid=$SteamID64&include_appinfo=1&format=json"
+        # Grabs the list of Steam Games
+        Find-ModuleExcel
 
-        $Form = New-Object System.Windows.Forms.Form
-        $Form.Text = "Enter SteamID64"
-        $Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
-        $Form.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
-        $Form.AutoSize = $true
-        $form.TopMost = $true
-        $Form.AutoSizeMode = "GrowAndShrink"
+        # Export the JSON file
+        Join-JsonTable
+        # Open up file explorer for user
+        Invoke-Item -Path $tempDir
 
-        # Create the message label
-        $MessageLabel = New-Object System.Windows.Forms.Label
-        $MessageLabel.Location = New-Object System.Drawing.Point(10, 10)
-        $MessageLabel.Size = New-Object System.Drawing.Size(280, 20)
-        $MessageLabel.Text = "Please enter your SteamID64 (must be 17 characters):"
-        $Form.Controls.Add($MessageLabel)
-
-        # Create the API Key textbox
-        $SteamID64TextBox = New-Object System.Windows.Forms.TextBox
-        $SteamID64TextBox.Location = New-Object System.Drawing.Point(10, 30)
-        $SteamID64TextBox.Size = New-Object System.Drawing.Size(280, 20)
-        $Form.Controls.Add($SteamID64TextBox)
-
-        # Create the "Next" button
-        $NextButton = New-Object System.Windows.Forms.Button
-        $NextButton.Location = New-Object System.Drawing.Point(115, 70)
-        $NextButton.Size = New-Object System.Drawing.Size(75, 23)
-        $NextButton.Text = "Next"
-        $NextButton.Enabled = $false
-        $NextButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
-        $Form.AcceptButton = $NextButton
-        $Form.Controls.Add($NextButton)
-
-        # Create the event handler for the API Key textbox
-        $SteamID64TextBox.add_TextChanged({
-                if ($SteamID64TextBox.Text.Length -eq 17) {
-                    $NextButton.Enabled = $true
-                }
-                else {
-                    $NextButton.Enabled = $false
-                }
-            })
-
-        # Show the form and wait for a result
-        $Result = $Form.ShowDialog()
-
-        # If the "Next" button was clicked and the API Key is 32 characters long, set the $ApiKey variable
-        if ($Result -eq [System.Windows.Forms.DialogResult]::OK -and $SteamID64TextBox.Text.Length -eq 17) {
-            $SteamID64 = $SteamID64TextBox.Text
-            #URL for API
-            $apiUrl = "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=$Apikey&steamid=$SteamID64&include_appinfo=1&format=json"
-            return $apiUrl
-        }
-        else {
-            Clear-Installation
-            exit
-        }
+        # Clean up after itself
+        Clear-Installation        
     }
     else {
         Clear-Installation
         exit
     }
 }
-
-    # Prompt the user for their API credentials
-    Get-ApiAccess
-
-    # Grabs the list of Steam Games
-    Find-ModuleExcel
-
-    # Export the JSON file
-    Join-JsonTable
-    # Open up file explorer for user
-    Invoke-Item -Path $tempDir
-
-    # Clean up after itself
+else {
     Clear-Installation
-
-
-
+    exit
+}
