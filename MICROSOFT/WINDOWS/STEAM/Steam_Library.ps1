@@ -3,7 +3,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 1.1.2.0
+    Version: 1.1.2.1
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
 
@@ -41,8 +41,7 @@ $username = Split-Path $env:USERPROFILE -Leaf
 
 # FUNCTION JUNCTION!!
 
-# Function that runs whenever script ends
-
+# Check to make sure AWSPowershell module is instlled
 <#
 Function Find-AWSPowerShell {
     # Check if the AWSPowershell Module is installed
@@ -53,6 +52,7 @@ Function Find-AWSPowerShell {
 }
 #>
 
+# Function that runs whenever script ends
 function Clear-Installation {
     # Dispose of any forms
     $form.Dispose()
