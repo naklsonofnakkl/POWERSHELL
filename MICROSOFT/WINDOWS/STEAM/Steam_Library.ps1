@@ -3,7 +3,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 1.1.1.1
+    Version: 1.1.1.2
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -28,7 +28,7 @@ Start-Transcript -Path $appLogs -Append
 
 # Grab the user's name for json file nameing
 $username = Split-Path $env:USERPROFILE -Leaf
-Write-Log "The current user is: $username"
+"The current user is: $username" | Out-File -FilePath $appLogs -Append
 
 
 
