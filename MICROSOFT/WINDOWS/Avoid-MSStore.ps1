@@ -46,10 +46,10 @@ $appxBundles = Get-ChildItem -Path $appDownload -Filter *.appxbundle
 # You can find the URL here: https://apps.microsoft.com/store/apps
 # Define the hashtable with application names and URLs
 $options = @{
-    'Microsoft Snip'             = 'https://apps.microsoft.com/store/detail/snipping-tool/9MZ95KL8MR0L, Microsoft.ScreenSketch';
-    'Microsoft Sticky Notes'     = 'https://apps.microsoft.com/store/detail/microsoft-sticky-notes/9NBLGGH4QGHW?ocid=Apps_O_WOL_FavTile_App_ForecaWeather_Pos5, Microsoft.MicrosoftStickyNotes' ;
+    'Microsoft Snip'         = 'https://apps.microsoft.com/store/detail/snipping-tool/9MZ95KL8MR0L, Microsoft.ScreenSketch';
+    'Microsoft Sticky Notes' = 'https://apps.microsoft.com/store/detail/microsoft-sticky-notes/9NBLGGH4QGHW?ocid=Apps_O_WOL_FavTile_App_ForecaWeather_Pos5, Microsoft.MicrosoftStickyNotes' ;
     'Microsoft Quick Assist' = 'https://apps.microsoft.com/store/detail/quick-assist/9P7BP5VNWKX5?ocid=Apps_O_WOL_FavTile_App_ForecaWeather_Pos5, MicrosoftCorporationII.QuickAssist' ;
-    'Microsoft Clock'            = 'https://apps.microsoft.com/store/detail/windows-clock/9WZDNCRFJ3PR?ocid=Apps_O_WOL_FavTile_App_ForecaWeather_Pos5, Microsoft.WindowsAlarms'
+    'Microsoft Clock'        = 'https://apps.microsoft.com/store/detail/windows-clock/9WZDNCRFJ3PR?ocid=Apps_O_WOL_FavTile_App_ForecaWeather_Pos5, Microsoft.WindowsAlarms'
 }
 
 # FUNCTION JUNCTION!
@@ -164,13 +164,13 @@ function Get-AppxModule {
 # Function to prompt the user with a popup when install cancelled
 function Pop-Cancelled {
     Add-Type -AssemblyName System.Windows.Forms
-                [System.Windows.Forms.MessageBox]::Show($global:output, 'Error', 'OK', [System.Windows.Forms.MessageBoxIcon]::Error)
+    [System.Windows.Forms.MessageBox]::Show($global:output, 'Error', 'OK', [System.Windows.Forms.MessageBoxIcon]::Error)
 }
 
 # Function to prompt the user with a popup when install succeeds
 function Pop-Success {
     Add-Type -AssemblyName System.Windows.Forms
-                    [System.Windows.Forms.MessageBox]::Show($global:output, 'Install Completed', 'OK', 'Information')
+    [System.Windows.Forms.MessageBox]::Show($global:output, 'Install Completed', 'OK', 'Information')
 }
 
 #Prompt the user to select an application to install
@@ -230,9 +230,9 @@ function Show-AppInstallDialog {
         $selectedOption = $dropdown.SelectedItem.ToString()
         # Split the option's value into two variables
         $appUrl, $appName = $options[$selectedOption] -split ', '
-            # Show the installation message
-            $installMessage = "$selectedOption is currently installing!"
-            Write-Host $installMessage
+        # Show the installation message
+        $installMessage = "$selectedOption is currently installing!"
+        Write-Host $installMessage
     
         # Check if the app is installed
         $package = Get-AppxPackage | Where-Object { $_.Name -eq $appName }
@@ -272,25 +272,25 @@ function Show-AppInstallDialog {
                     }
                     
                 }
-                    # Validate if the application installed successfully
-                    if (Get-AppxPackage -Name $appName) {
-                        $global:output = "$selectedOption is installed."
-                        Pop-Success
-                        Clear-Installation
-                    }
-                    else {
-                        $global:output = "$selectedOption did not install correctly! Please view the log file for more details!"
-                        Pop-Cancelled
-                        Clear-Installation
-                    }
-            }
+                # Validate if the application installed successfully
+                if (Get-AppxPackage -Name $appName) {
+                    $global:output = "$selectedOption is installed."
+                    Pop-Success
+                    Clear-Installation
+                }
                 else {
-                    $global:output = "You canceled the installation."
+                    $global:output = "$selectedOption did not install correctly! Please view the log file for more details!"
                     Pop-Cancelled
                     Clear-Installation
                 }
             }
+            else {
+                $global:output = "You canceled the installation."
+                Pop-Cancelled
+                Clear-Installation
+            }
         }
+    }
     else {
         $global:output = "$selectedOption install was declined. Appication will now close."
         Pop-Cancelled
