@@ -3,7 +3,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 1.1.1.0
+    Version: 1.1.1.1
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -81,24 +81,13 @@ function Get-NuGet {
     $packageName = "NuGet"
     $version = "2.8.5.208"
     if (Get-Package -Name $packageName -ErrorAction SilentlyContinue | Where-Object { $_.Version -eq $version }) {
-        Write-Log "NuGet is Installed!"
+        "NuGet is Installed!" | Out-File -FilePath $appLogs -Append
     }
     else {
-        Write-Log "Installing NuGet!"
+        "Installing NuGet!" | Out-File -FilePath $appLogs -Append
         Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
         Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
     }
-}
-
-# Redirect Write-Host to log file
-function Write-Log {
-    param([string]$message)
-
-    # Get the current date and time in a specific format
-    $date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-
-    # Write the message to the log file with the current date and time
-    "$date - $message" | Out-File -FilePath $tempDir -Append
 }
 
 # install modules, import them and then export JSON file
@@ -107,15 +96,15 @@ function Join-JsonTable {
     $Json_Url = $apiUrl
     $owned_games_Json = "$tempDir\$username.json"
     Invoke-WebRequest -Uri $Json_Url -OutFile $owned_games_Json
-    Write-Log "EXPORTING THE GAMES!"
+    "EXPORTING THE GAMES!" | Out-File -FilePath $appLogs -Append
 }
 
 function Get-ModuleExcel {
     # Install the ImportExcel and PSWriteExcel modules if they're not already installed
-    Write-Log "INSTALLING MODULES!"
+    "INSTALLING MODULES!" | Out-File -FilePath $appLogs -Append
     Install-Module -Name ImportExcel, PSWriteExcel
     # Load the modules into the current session
-    Write-Log "IMPORTING MODULES!"
+    "IMPORTING MODULES!" | Out-File -FilePath $appLogs -Append
     Import-Module -Name ImportExcel, PSWriteExcel
 }
 
@@ -128,16 +117,16 @@ function Find-ModuleExcel {
     $installedModule = Get-Module -ListAvailable | Where-Object { $_.Name -eq $moduleName }
         
     if ($installedModule) {
-        Write-Log "The $moduleName module is installed."
+        "The $moduleName module is installed." | Out-File -FilePath $appLogs -Append
         # execute the rest of the script 
     }
     else {
-        Write-Log "The $moduleName module is not installed."
+        "The $moduleName module is not installed." | Out-File -FilePath $appLogs -Append
         # Install the missing module and run the rest of the script
         Get-NuGet
-        Write-Log "INSTALLED NUGET!"
+        "INSTALLED NUGET!" | Out-File -FilePath $appLogs -Append
         Get-ModuleExcel
-        Write-Log "IMPORTED MODULES!"
+        "IMPORTED MODULES!" | Out-File -FilePath $appLogs -Append
     }
     
 } 
@@ -268,7 +257,7 @@ Set-ExecutionPolicyTemporarily -ExecutionPolicy RemoteSigned -ScriptBlock {
 
     # Export the JSON file
     Join-JsonTable
-    Write-Log "EXPORTED THE GAMES!"
+    "EXPORTED THE GAMES!" | Out-File -FilePath $appLogs -Append
 
     # Open up file explorer for user
     Invoke-Item -Path $tempDir
