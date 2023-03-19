@@ -3,7 +3,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 1.1.1.2
+    Version: 1.1.1.3
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -24,7 +24,15 @@ $tempDir = $tempDirCreate
 # LOGS!!
 $ErrorActionPreference = "Stop"
 $appLogs = "$tempDir\SteamLib.log"
-Start-Transcript -Path $appLogs -Append
+# Check if a transcript is running
+if ($global:PSIsTranscripting) {
+    # Stop the transcript
+    Stop-Transcript
+    Start-Transcript -Path $appLogs -Append
+}
+else {
+    Start-Transcript -Path $appLogs -Append
+}
 
 # Grab the user's name for json file nameing
 $username = Split-Path $env:USERPROFILE -Leaf
