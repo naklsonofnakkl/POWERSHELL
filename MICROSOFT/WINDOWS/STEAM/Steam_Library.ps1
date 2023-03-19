@@ -39,8 +39,6 @@ else {
 $username = Split-Path $env:USERPROFILE -Leaf
 
 
-
-
 # FUNCTION JUNCTION!!
 
 # Function that runs whenever script ends
