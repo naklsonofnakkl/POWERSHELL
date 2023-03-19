@@ -3,7 +3,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 0.1.1
+    Version: 1.1.1.0
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
