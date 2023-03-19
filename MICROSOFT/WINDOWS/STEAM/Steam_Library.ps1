@@ -3,8 +3,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 1.1.1.4
-    
+    Version: 1.1.1.5
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
 
@@ -247,7 +246,7 @@ function Get-ApiAccess {
 }
 
 # Set the execution policy to be open temporarily
-Set-ExecutionPolicyTemporarily -ExecutionPolicy RemoteSigned -ScriptBlock {
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -ScriptBlock {
     # Prompt the user for their API credentials
     Get-ApiAccess
 
