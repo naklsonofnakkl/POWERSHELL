@@ -1,7 +1,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 0.0.7
+    Version: 0.1.0
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -12,6 +12,23 @@
     - Promps the user for their API key and SteamID64
 #>
 
+# VARIABLE PARADISE
+# create a temp folder & Start log file
+# THIS IS WHERE LOGS WILL ALSO BE LOCATED!
+# C:\Users\[USERNAME]\AppData\Local\Temp\SteamLib_temp
+$tempDirCreate = New-Item -ItemType Directory -Path $env:TEMP -Name SteamLib_temp -Force
+$tempDir = $tempDirCreate
+# LOGS!!
+$ErrorActionPreference = "Stop"
+$appLogs = "$tempDir\SteamLib.log"
+Start-Transcript -Path $appLogs -Append
+
+# Grab the user's name for json file nameing
+$username = Split-Path $env:USERPROFILE -Leaf
+Write-Host "The current user is: $username"
+
+
+
 # FUNCTION JUNCTION!!
 function Clear-Installation {
     # Dispose of any forms
@@ -19,12 +36,12 @@ function Clear-Installation {
     $form.Close()
     Stop-Transcript
     # Get all the files in the directory
-    $files = Get-ChildItem $appDownloadpath
+    $files = Get-ChildItem $tempDir
 
     # Loop through each file
     foreach ($file in $files) {
         # Check if the file is not the one you want to keep
-        if ($file.Name -ne "Steam_Multiplayer.xlsx" -and $file.Name -ne "SteamLib.log") {
+        if ($file.Name -ne "$username.json" -and $file.Name -ne "SteamLib.log") {
             # Delete the file
             Remove-Item $file.FullName
         }
@@ -53,47 +70,20 @@ function Join-JsonTable {
     # Load the modules into the current session
     Import-Module -Name ImportExcel, PSWriteExcel
 
-    # Define the URL of the JSON data
-    $jsonUrl = $owned_games
-
     # Import the JSON data
-    $jsonData = Invoke-RestMethod -Uri $jsonUrl
-
-    # Convert the JSON data to a PowerShell object
-    $data = ConvertFrom-Json -InputObject $jsonData
-
-    # Export the data to an Excel file
-    $excelFilePath = "$appDownloadPath\steam_library_stats.xlsx"
-    $data | Export-Excel -Path $excelFilePath -AutoSize -AutoFilter
-
+    $Json_Url = $apiUrl
+    $owned_games_Json = "$tempDir\$username.json"
+    Invoke-WebRequest -Uri $Json_Url -OutFile $owned_games_Json
+    Write-Host "EXPORTING THE GAMES!"
 }
 
-# Function to grab my Big Beautiful Excel module
-function Get-BBE {
-    # Modules to Import!
-    $url = "http://github.naklwilson.net/MICROSOFT/OFFICE/EXCEL/BBE.psm1"
-    $outputFile = "$appDownload\BBE.psm1"
-    Invoke-WebRequest -Uri $url -OutFile $outputFile
-    Import-Module $outputFile
-}
 #Use the Steam API to create a varible with all the users games listed
 function Get-SteamLibrary {
     # Fetch the list of owned games
-    $owned_games_url = "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=$secureAPI&steamid=$SteamID64&include_appinfo=1&format=json"
-    $owned_games_response = Invoke-RestMethod -Uri $owned_games_url
+    $owned_games_url = $apiUrl
     $owned_games = $owned_games_response.response.games
     Write-Host "I HAS THE GAMES!"
-}
-
-# create a temp folder & Start log file
-Function New-ApplicationStart {
-    # THIS IS WHERE LOGS WILL ALSO BE LOCATED!
-    # C:\Users\[USERNAME]\AppData\Local\Temp\SteamLib_temp
-    $tempDir = New-Item -ItemType Directory -Path $env:TEMP -Name SteamLib_temp -Force
-    # LOGS!!
-    $ErrorActionPreference = "Stop"
-    $appLogs = "$tempDir\SteamLib.log"
-    Start-Transcript -Path $appLogs -Append
+    
 }
 
 function Add-ModuleExcel {
@@ -108,23 +98,24 @@ function Add-ModuleExcel {
     
         # execute the rest of the script 
         Join-JsonTable
-        Format-SteamXlsx
+        Write-Host "EXPORTED THE GAMES!"
+        Invoke-Item -Path $tempDir
         Clear-Installation
-        Invoke-Item -Path $appDownloadPath
     }
     else {
         Write-Host "The $moduleName module is not installed."
         # Install the missing module and run the rest of the script
         Get-NuGet
+        Write-Host "INSTALLED NUGET!"
         Join-JsonTable
-        Format-SteamXlsx
+        Write-Host "EXPORTED THE GAMES!"
+        Invoke-Item -Path $tempDir
         Clear-Installation
-        Invoke-Item -Path $appDownloadPath
     }
     
 } 
 
-New-ApplicationStart
+
 #This is a form to ask for the users API and SteamID
 Add-Type -AssemblyName System.Windows.Forms
 
@@ -175,7 +166,6 @@ $Result = $Form.ShowDialog()
 # If the "Next" button was clicked and the API Key is 32 characters long, set the $ApiKey variable
 if ($Result -eq [System.Windows.Forms.DialogResult]::OK -and $ApiKeyTextBox.Text.Length -eq 32) {
     $Apikey = $ApiKeyTextBox.Text
-    $secureAPI = $Apikey | ConvertTo-SecureString -AsPlainText -Force
     Add-Type -AssemblyName System.Windows.Forms
 
     $Form = New-Object System.Windows.Forms.Form
@@ -225,14 +215,15 @@ if ($Result -eq [System.Windows.Forms.DialogResult]::OK -and $ApiKeyTextBox.Text
     # If the "Next" button was clicked and the API Key is 32 characters long, set the $ApiKey variable
     if ($Result -eq [System.Windows.Forms.DialogResult]::OK -and $SteamID64TextBox.Text.Length -eq 17) {
         $SteamID64 = $SteamID64TextBox.Text
+        #URL for API
+        $apiUrl = "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=$Apikey&steamid=$SteamID64&include_appinfo=1&format=json"
 
-        Get-SteamLibrary
-        Get-BBE
-        Write-Host $outputFile
         Add-ModuleExcel
         
-        
+    } else {
+        Clear-Installation
     }
+} else {
     Clear-Installation
 }
 
