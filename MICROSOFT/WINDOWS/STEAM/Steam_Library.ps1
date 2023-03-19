@@ -3,7 +3,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 1.1.1.5
+    Version: 1.1.1.6
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
 
@@ -41,7 +41,7 @@ $username = Split-Path $env:USERPROFILE -Leaf
 
 # FUNCTION JUNCTION!!
 
-function Set-ExecutionPolicy {
+function Set-ExecutionPolicyTemp {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]
@@ -246,7 +246,7 @@ function Get-ApiAccess {
 }
 
 # Set the execution policy to be open temporarily
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -ScriptBlock {
+Set-ExecutionPolicyTemp -ExecutionPolicy RemoteSigned -ScriptBlock {
     # Prompt the user for their API credentials
     Get-ApiAccess
 
