@@ -3,7 +3,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 1.1.1.6
+    Version: 1.1.1.7
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
 
@@ -12,6 +12,8 @@
 .DESCRIPTION
     - Promps the user for their API key and SteamID64
 #>
+
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
 
 # VARIABLE PARADISE
 
@@ -40,29 +42,6 @@ $username = Split-Path $env:USERPROFILE -Leaf
 
 
 # FUNCTION JUNCTION!!
-
-function Set-ExecutionPolicyTemp {
-    [CmdletBinding()]
-    param (
-        [Parameter(Mandatory = $true)]
-        [string]$policy
-    )
- 
-    # Get the current execution policy
-    $originalPolicy = Get-ExecutionPolicy
- 
-    try {
-        # Set the execution policy to the specified value
-        Set-ExecutionPolicy -ExecutionPolicy $policy -Scope CurrentUser -Force
- 
-        # Run the script block
-        & $scriptblock
-    }
-    finally {
-        # Set the execution policy back to the original value
-        Set-ExecutionPolicy -ExecutionPolicy $originalPolicy -Scope CurrentUser -Force
-    }
-}
 
 # Function that runs whenever script ends
 function Clear-Installation {
@@ -245,8 +224,6 @@ function Get-ApiAccess {
     }
 }
 
-# Set the execution policy to be open temporarily
-Set-ExecutionPolicyTemp -ExecutionPolicy RemoteSigned -ScriptBlock {
     # Prompt the user for their API credentials
     Get-ApiAccess
 
@@ -260,7 +237,6 @@ Set-ExecutionPolicyTemp -ExecutionPolicy RemoteSigned -ScriptBlock {
 
     # Clean up after itself
     Clear-Installation
-} 
 
 
 
