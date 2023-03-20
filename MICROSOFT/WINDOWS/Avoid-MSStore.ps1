@@ -4,7 +4,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 0.0.4
+    Version: 1.0.1.0
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -74,14 +74,14 @@ function Find-AppxPackage {
     )
        
     process {
-        echo ""
+        Write-Output ""
         $StopWatch = [system.diagnostics.stopwatch]::startnew()
         $Path = (Resolve-Path $Path).Path
         #Get Urls to download
         Write-Host -ForegroundColor Yellow "Processing $Uri"
         $WebResponse = Invoke-WebRequest -UseBasicParsing -Method 'POST' -Uri 'https://store.rg-adguard.net/api/GetFiles' -Body "type=url&url=$Uri&ring=Retail" -ContentType 'application/x-www-form-urlencoded'
-        $LinksMatch = ($WebResponse.Links | where { $_ -like '*.appx*' } | where { $_ -like '*_neutral_*' -or $_ -like "*_" + $env:PROCESSOR_ARCHITECTURE.Replace("AMD", "X").Replace("IA", "X") + "_*" } | Select-String -Pattern '(?<=a href=").+(?=" r)').matches.value
-        $Files = ($WebResponse.Links | where { $_ -like '*.appx*' } | where { $_ -like '*_neutral_*' -or $_ -like "*_" + $env:PROCESSOR_ARCHITECTURE.Replace("AMD", "X").Replace("IA", "X") + "_*" } | where { $_ } | Select-String -Pattern '(?<=noreferrer">).+(?=</a>)').matches.value
+        $LinksMatch = ($WebResponse.Links | Where-Object { $_ -like '*.appx*' } | Where-Object { $_ -like '*_neutral_*' -or $_ -like "*_" + $env:PROCESSOR_ARCHITECTURE.Replace("AMD", "X").Replace("IA", "X") + "_*" } | Select-String -Pattern '(?<=a href=").+(?=" r)').matches.value
+        $Files = ($WebResponse.Links | Where-Object { $_ -like '*.appx*' } | Where-Object { $_ -like '*_neutral_*' -or $_ -like "*_" + $env:PROCESSOR_ARCHITECTURE.Replace("AMD", "X").Replace("IA", "X") + "_*" } | Where-Object { $_ } | Select-String -Pattern '(?<=noreferrer">).+(?=</a>)').matches.value
         #Create array of links and filenames
         $DownloadLinks = @()
         for ($i = 0; $i -lt $LinksMatch.Count; $i++) {
