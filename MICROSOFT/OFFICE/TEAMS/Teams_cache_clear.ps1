@@ -3,7 +3,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 1.1.0.0
+    Version: 1.1.0.1
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -126,6 +126,12 @@ function Reset-MicrosoftTeams {
     foreach ($file in $files) { move-item -path $file -destination $filedest -ErrorAction SilentlyContinue }
   }
 }
+
+<#
+--------------------
+SCRIPTED EXECUTION!
+--------------------
+#>
 
 Close-MicrosoftTeams
 Reset-MicrosoftTeams
