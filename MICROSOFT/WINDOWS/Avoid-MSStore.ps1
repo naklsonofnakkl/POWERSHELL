@@ -4,7 +4,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 1.0.1.0
+    Version: 1.0.1.1
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -22,7 +22,12 @@
 #>
 
 
-# VARIBALE PARADISE!
+<#
+--------------------
+ VARIBALE PARADISE!
+--------------------
+#>
+
 # create a temp folder
 # THIS IS WHERE LOGS WILL ALSO BE LOCATED!
 # C:\Users\[USERNAME]\AppData\Local\Temp\MSSTORE_temp
@@ -52,7 +57,12 @@ $options = @{
     'Microsoft Clock'        = 'https://apps.microsoft.com/store/detail/windows-clock/9WZDNCRFJ3PR?ocid=Apps_O_WOL_FavTile_App_ForecaWeather_Pos5, Microsoft.WindowsAlarms'
 }
 
-# FUNCTION JUNCTION!
+<#
+--------------------
+FUNCTION JUNCTION!
+--------------------
+#>
+
 # Function to clean up the leftover downloaded files
 function Clear-Installation {
     # Dispose of any forms
@@ -298,21 +308,17 @@ function Show-AppInstallDialog {
     }
 }
 
-
-<# 
-    This is the code used to validate you can install appx
-    applications at all, and if necessary, install the module
-    for you!
-#>
-Get-AppxModule
-Import-Module Appx
-
-
 <#
-This is the code used to prompt the user for the application to install,
-download the files based on the application(s) selected and automatically
-install it for them!
+--------------------
+SCRIPTED EXECUTION!
+--------------------
 #>
+
+# Validate Appx module is installed, if not, install it
+Get-AppxModule
+# Import the Appx module
+Import-Module Appx
+# Prompt user to select an app to install
 Show-AppInstallDialog
 
 exit
