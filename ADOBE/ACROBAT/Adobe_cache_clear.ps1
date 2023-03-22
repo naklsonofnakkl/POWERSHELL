@@ -3,7 +3,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 1.1.0.6
+    Version: 1.1.0.7
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -28,8 +28,6 @@
 #Directories
 $tempDir = $env:TEMP
 $adobelocal = "$env:LOCALAPPDATA\Adobe\Acrobat"
-$oldDC = "$env:LOCALAPPDATA\Adobe\Acrobat\DC.old"
-$oldXI = "$env:LOCALAPPDATA\Adobe\Acrobat\XI.old"
 $adobeDC = "$env:LOCALAPPDATA\Adobe\Acrobat\DC"
 $adobeXI = "$env:LOCALAPPDATA\Adobe\Acrobat\XI"
 $oldDirs = Get-ChildItem -Path $adobelocal -Directory -Filter *.old | Where-Object { Test-Path $_.FullName -PathType Container }
@@ -52,6 +50,18 @@ FUNCTION JUNCTION!
 # Function to clean up the leftover downloaded files
 function Clear-Installation {
   Stop-Transcript
+}
+
+# Function to prompt the user with a popup when install cancelled
+function Pop-Cancelled {
+  Add-Type -AssemblyName System.Windows.Forms
+  [System.Windows.Forms.MessageBox]::Show($global:output, 'Cancelled', 'OK', [System.Windows.Forms.MessageBoxIcon]::Error)
+}
+
+# Function to prompt the user with a popup when install succeeds
+function Pop-Success {
+  Add-Type -AssemblyName System.Windows.Forms
+  [System.Windows.Forms.MessageBox]::Show($global:output, 'Completed', 'OK', 'Information')
 }
 
 #Function to automatically close Adobe Acrobat
@@ -87,11 +97,24 @@ function Close-AdobeAcrobat {
 
 #Function to automatically clear the cache of Adobe Acrobat
 function Reset-AdobeAcrobat {
+
+  $global:output = ''
 # Create a Windows form
 $Form = New-Object System.Windows.Forms.Form
-$Form.Text = "Clearing the Cache..."
+$Form.Text = "Adobe Cache Clear"
 $Form.Size = New-Object System.Drawing.Size(300,200)
 $Form.StartPosition = "CenterScreen"
+$form.TopMost = $true
+
+# Create the "start" button
+$StartButton = New-Object System.Windows.Forms.Button
+$StartButton.Location = New-Object System.Drawing.Point(100, 90)
+$StartButton.Size = New-Object System.Drawing.Size(75, 23)
+$StartButton.Text = "Start"
+$StartButton.Enabled = $true
+$StartButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
+$Form.AcceptButton = $StartButton
+$Form.Controls.Add($StartButton)
 
 # Create a progress bar and set its properties
 $ProgressBar = New-Object System.Windows.Forms.ProgressBar
@@ -103,12 +126,14 @@ $ProgressBar.Maximum = 100
 # Add the progress bar to the form
 $Form.Controls.Add($ProgressBar)
 
-# Show the form
-$Form.ShowDialog()
-
 # Set the value of the progress bar based on a variable
 $ProgressBar.Value = $Variable
 
+# Show the form
+$Result = $Form.ShowDialog()
+
+
+if ($Result -eq [System.Windows.Forms.DialogResult]::OK) {
 if ((Test-Path $adobeDC) -and (Test-Path $adobeXI)) {
   $Variable = 25
     # Both paths exist
@@ -143,12 +168,14 @@ if ($oldDirs) {
     Rename-Item -Path "$adobelocal\XI" "$adobelocal\XI.old" -ErrorAction SilentlyContinue
     $Variable = 90
     Rename-Item -Path "$adobelocal\DC" "$adobelocal\DC.old" -ErrorAction SilentlyContinue
+    $global:output = "Cache is cleared!"
     $Variable = 100
 } else {
     $Variable = 75
     Rename-Item -Path "$adobelocal\XI" "$adobelocal\XI.old" -ErrorAction SilentlyContinue
     $Variable = 90
     Rename-Item -Path "$adobelocal\DC" "$adobelocal\DC.old" -ErrorAction SilentlyContinue
+    $global:output = "Cache is cleared!"
     $Variable = 100
 }
 }
@@ -162,10 +189,12 @@ elseif ($adobeTest -eq "Adobe DC is installed") {
       }
       $Variable = 80  
   Rename-Item -Path "$adobelocal\DC" "$adobelocal\DC.old" -ErrorAction SilentlyContinue
+  $global:output = "Cache is cleared!"
   $Variable = 100
 } else {
   $Variable = 75 
   Rename-Item -Path "$adobelocal\DC" "$adobelocal\DC.old" -ErrorAction SilentlyContinue
+  $global:output = "Cache is cleared!"
   $Variable = 100
 }
 }
@@ -179,20 +208,24 @@ elseif ($adobeTest -eq "Adobe XI is installed") {
       }
       $Variable = 80  
   Rename-Item -Path "$adobelocal\XI" "$adobelocal\XI.old" -ErrorAction SilentlyContinue
+  $global:output = "Cache is cleared!"
   $Variable = 100
 } else {
   $Variable = 75 
   Rename-Item -Path "$adobelocal\XI" "$adobelocal\XI.old" -ErrorAction SilentlyContinue
+  $global:output = "Cache is cleared!"
   $Variable = 100
 }
 }
 else {
   $Variable = 100
     # Nothing to do but quit
-    Write-Host = $adobeTest
+    $global:output = $adobeTest
+}
 }
 if ($Variable -eq 100) {
   $form.Close()
+  Pop-Success
   Clear-Installation
   exit
 }
