@@ -3,13 +3,13 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 0.0.0.1
+    Version: 0.0.0.2
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
 
 .SYNOPSIS
-    Remove the Intel UHD Graphics driver
+    Prompts the user for which driver they would like to uninstall
 .DESCRIPTION
     - 
 #>
@@ -28,12 +28,28 @@ $appLogs = "$tempDir\Driver_Uninstall.log"
 $ErrorActionPreference = "Stop"
 Start-Transcript -Path $appLogs -Append
 
-# Find the device ID of the user inputed driver
-$device = Get-PnpDevice | Where-Object { $_.FriendlyName -eq $driverName }
-$deviceId = $device.InstanceId
-$driverName = ''
-$infName = ''
-$driver = Get-PnpDevice -PresentOnly | Where-Object { $_.DeviceId -eq $deviceId }
+# Get all drivers and store them in a hashtable
+$driverHashTable = @{}
+
+
+$pnputilOutput = pnputil.exe /enum-drivers
+
+$pnputilOutput | Where-Object { $_ -like "Published name:*" } | ForEach-Object {
+    $driverLine = $_
+    $publishedName = $driverLine.Substring(16).Trim()
+
+    $nextLine = $pnputilOutput[$pnputilOutput.IndexOf($driverLine) + 1]
+    $classGuid = $nextLine.Substring(14).Trim()
+
+    $nextLine = $pnputilOutput[$pnputilOutput.IndexOf($driverLine) + 3]
+    $driverDescription = $nextLine.Substring(25).Trim()
+
+    $driverHashTable[$classGuid] = @{
+        "PublishedName"     = $publishedName
+        "DriverDescription" = $driverDescription
+    }
+}
+
 
 # Popup Message Box
 $global:output = ''
@@ -82,37 +98,6 @@ function Pop-Restart {
 
 }
 
-# Function to prompt user for the Driver to uninstall
-function Get-DriverName {
-
-}
-
-function Remove-DeviceDriver {
-    # Uninstall the device driver using the device ID
-    Try {
-        # Disable-PnpDevice -InstanceId $deviceId -Confirm:$false
-
-        # Uninstall the driver
-        # pnputil /delete-driver $infName /uninstall
-        write-host = $infName
-        # Validate if the driver has been uninstalled
-        if ($driver) {
-            $global:output = "$driverName is installed."
-            Pop-Cancelled
-            Clear-Installation
-        }
-        else {
-            $global:output = "$driverName is not installed."
-            Pop-Success
-            $global:output = "Restart is required to complete installation. Do you want to restart now?"
-            # Pop-Restart
-        }
-    }
-    Catch {
-        $global:output = $_.Exception.Message
-        Pop-Cancelled
-    }
-}
 
 <#
 --------------------
@@ -120,56 +105,56 @@ SCRIPTED EXECUTION!
 --------------------
 #>
 
-#Get-DriverName
-Add-Type -AssemblyName System.Windows.Forms
-
+# Create a form to prompt the user to select a driver to uninstall
 $form = New-Object System.Windows.Forms.Form
-$form.Text = "Uninstall Device Driver"
+$form.Text = "Uninstall Driver"
 $form.Width = 400
-$form.Height = 150
-$form.StartPosition = "CenterScreen"
-$form.FormBorderStyle = "FixedSingle"
-$form.MaximizeBox = $false
-$form.MinimizeBox = $false
-$Form.AutoSize = $true
-$form.TopMost = $true
-$Form.AutoSizeMode = "GrowAndShrink"
-
+$form.Height = 200
 $label = New-Object System.Windows.Forms.Label
+$label.Text = "Select a driver to uninstall:"
 $label.Location = New-Object System.Drawing.Point(10, 20)
-$label.Size = New-Object System.Drawing.Size(380, 20)
-$label.Text = "Type the name of the driver you wish to uninstall:"
+$label.AutoSize = $true
+$dropdown = New-Object System.Windows.Forms.ComboBox
+$dropdown.Location = New-Object System.Drawing.Point(10, 50)
+$dropdown.Width = 300
+$dropdown.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+foreach ($driver in $driverHashTable.Values) {
+    if (![string]::IsNullOrEmpty($driver.DriverDescription)) {
+        $dropdown.Items.Add($driver.DriverDescription)
+    }
+}
+if ($dropdown.Items.Count -gt 0) {
+    $dropdown.SelectedIndex = 0
+}
+$dropdown.Location = New-Object System.Drawing.Point(10, 50)
+$button = New-Object System.Windows.Forms.Button
+$button.Location = New-Object System.Drawing.Point(10, 100)
+$button.Text = "Uninstall"
+$button.DialogResult = [System.Windows.Forms.DialogResult]::OK
+$form.AcceptButton = $button
 $form.Controls.Add($label)
+$form.Controls.Add($dropdown)
+$form.Controls.Add($button)
 
-$textBox = New-Object System.Windows.Forms.TextBox
-$textBox.Location = New-Object System.Drawing.Point(10, 50)
-$textBox.Size = New-Object System.Drawing.Size(380, 20)
-$form.Controls.Add($textBox)
-
-$continueButton = New-Object System.Windows.Forms.Button
-$continueButton.Location = New-Object System.Drawing.Point(220, 85)
-$continueButton.Size = New-Object System.Drawing.Size(80, 30)
-$continueButton.Text = "Continue"
-$continueButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
-$form.AcceptButton = $continueButton
-$form.Controls.Add($continueButton)
-
-$cancelButton = New-Object System.Windows.Forms.Button
-$cancelButton.Location = New-Object System.Drawing.Point(310, 85)
-$cancelButton.Size = New-Object System.Drawing.Size(80, 30)
-$cancelButton.Text = "Cancel"
-$cancelButton.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
-$form.CancelButton = $cancelButton
-$form.Controls.Add($cancelButton)
-
-$resultDriver = $form.ShowDialog()
-if ($resultDriver -eq [System.Windows.Forms.DialogResult]::OK) {
-    $driverName = $textBox.Text
-    $global:output = "Attemping to uninstall the driver: $driverName"
+# Show the form and uninstall the selected driver
+$result = $form.ShowDialog()
+if ($result -eq [System.Windows.Forms.DialogResult]::OK) {
+    $selectedDriver = $driverHashTable.Values | Where-Object { $_.DriverDescription -eq $dropdown.SelectedItem.ToString() }
+    $global:output = "Press Ok to uninstall the $selectedDriver driver!"
     Pop-Success
-    # Find the INF file name for the driver
-    $infName = pnputil /enum-drivers | Select-String -Pattern $driverName | ForEach-Object { $_.ToString().Split(',')[1].Trim() }
-    Remove-DeviceDriver
+    Try {
+        pnputil.exe /delete-driver $selectedDriver.PublishedName /force /uninstall
+        $global:output = "Driver '$($selectedDriver.DriverDescription)' has been uninstalled."
+        Pop-Success
+        
+    }
+    catch {
+        $global:output = "Something went wrong!"
+        Pop-Cancelled
+        Clear-Installation
+    }
+    Pop-Restart
+    
 }
 else {
     $global:output = "You have cancelled the script!"
