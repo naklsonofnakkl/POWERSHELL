@@ -3,7 +3,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 0.0.0.2
+    Version: 0.0.0.3
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -51,7 +51,7 @@ SCRIPTED EXECUTION!
 
 sfc /scannow
 chkdsk C: /f /r /x
-#Dism /Online /Cleanup-Image /RestoreHealth
+Dism /Online /Cleanup-Image /RestoreHealth
 
 # Ask if user needs to Restart
 Add-Type -AssemblyName System.Windows.Forms
