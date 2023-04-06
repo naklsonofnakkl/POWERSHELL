@@ -3,7 +3,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 0.0.0.1
+    Version: 0.0.0.2
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -28,7 +28,7 @@
 # C:\Users\[USERNAME]\AppData\Local\Temp\
 $tempDir = $env:TEMP
 $appLogs = "$tempDir\FullScan_PS.log"
-$ErrorActionPreference = "continue"
+$ErrorActionPreference = "end"
 Start-Transcript -Path $appLogs -Append
 
 <#
