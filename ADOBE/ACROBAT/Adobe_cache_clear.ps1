@@ -3,7 +3,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 1.1.0.7
+    Version: 1.1.0.8
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -40,6 +40,8 @@ $Variable = 0
 $appLogs = "$tempDir\Adobe_Cache.log"
 $ErrorActionPreference = "Stop"
 Start-Transcript -Path $appLogs -Append
+
+$global:output = ''
 
 <#
 --------------------
@@ -98,8 +100,8 @@ function Close-AdobeAcrobat {
 #Function to automatically clear the cache of Adobe Acrobat
 function Reset-AdobeAcrobat {
 
-  $global:output = ''
 # Create a Windows form
+Add-Type -AssemblyName System.Windows.Forms
 $Form = New-Object System.Windows.Forms.Form
 $Form.Text = "Adobe Cache Clear"
 $Form.Size = New-Object System.Drawing.Size(300,200)
@@ -239,7 +241,3 @@ SCRIPTED EXECUTION!
 
 Close-AdobeAcrobat
 Reset-AdobeAcrobat
-
-
-
-
