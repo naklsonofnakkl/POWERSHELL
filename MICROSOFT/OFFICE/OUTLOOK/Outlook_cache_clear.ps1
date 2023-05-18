@@ -3,7 +3,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 1.1.0.5
+    Version: 1.1.0.6
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -27,7 +27,6 @@
 
 #Directories
 $tempDir = $env:TEMP
-$outlookDir = "C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE"
 $outroam = "$env:APPDATA\Microsoft\Outlook"
 $outlocal = "$env:LOCALAPPDATA\Microsoft\Outlook"
 $oldroam = "$env:APPDATA\Microsoft\Outlook\OLD"
@@ -84,23 +83,11 @@ function Close-MicrosoftOutlook {
 #Function to automatically open Microsoft Outlook
 function Open-MicrosoftOutlook {
   Add-Type -AssemblyName System.Windows.Forms
-  $caption = "Outlook Restart Prompt"
-  $message = "Do you wish to re-open Microsoft Outlook?"
-  $buttons = [System.Windows.Forms.MessageBoxButtons]::YesNo
+  $caption = "Outlook Cache Cleared"
+  $message = "The Outlook Cache has been cleared!"
+  $buttons = [System.Windows.Forms.MessageBoxButtons]::Ok
   $result = [System.Windows.Forms.MessageBox]::Show($message, $caption, $buttons)
-
-  if ($result -eq [System.Windows.Forms.DialogResult]::Yes) {
-    # User clicked "Yes"
-    # Launch Microsoft Outlook with the target command
-    Start-Process -FilePath $outlookDir
-    Clear-Installation
-    exit
-  }
-  else {
-    # User clicked "No"
-    Clear-Installation
-    exit
-  }
+  Clear-Installation
 }
 
 #Function to automatically clear the cache of Microsoft Outlook
