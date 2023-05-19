@@ -3,7 +3,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 1.1.0.6
+    Version: 1.1.0.7
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -115,8 +115,8 @@ function Reset-MicrosoftOutlook {
     $accessControl = (Get-Acl $oldoffline).Access
     $writeAccess = $accessControl | Where-Object { $_.FileSystemRights -band [System.Security.AccessControl.FileSystemRights]::Write }
     if (!$writeAccess) {
-      # The folder is not writable, so close the Excel process
-      Get-Process -Name "Excel" | ForEach-Object { $_.CloseMainWindow() }
+      # The folder is not writable, so close the OneNote process
+      Get-Process -Name "ONENOTE" | ForEach-Object { $_.CloseMainWindow() }
     }
     Rename-Item -Path "$outlocal\Offline Address Books" "$outlocal\Offline Address Books.old"
   }
@@ -129,8 +129,8 @@ function Reset-MicrosoftOutlook {
     $accessControl = (Get-Acl $oldoffline).Access
     $writeAccess = $accessControl | Where-Object { $_.FileSystemRights -band [System.Security.AccessControl.FileSystemRights]::Write }
     if (!$writeAccess) {
-      # The folder is not writable, so close the Excel process
-      Get-Process -Name "Excel" | ForEach-Object { $_.CloseMainWindow() }
+      # The folder is not writable, so close the OneNote process
+      Get-Process -Name "ONENOTE" | ForEach-Object { $_.CloseMainWindow() }
     }
     Rename-Item -Path "$outlocal\Offline Address Books" "$outlocal\Offline Address Books.old"
   }
