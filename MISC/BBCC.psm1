@@ -3,7 +3,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 0.0.0.4
+    Version: 0.0.0.5
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -211,29 +211,6 @@ FUNCTION JUNCTION!
     }
   }
 
-  #Function to automatically open Microsoft Teams
-  function Open-MicrosoftTeams {
-    Add-Type -AssemblyName System.Windows.Forms
-    $caption = "Teams Restart Prompt"
-    $message = "Do you wish to re-open Microsoft Teams?"
-    $buttons = [System.Windows.Forms.MessageBoxButtons]::YesNo
-    $result = [System.Windows.Forms.MessageBox]::Show($message, $caption, $buttons)
-
-    if ($result -eq [System.Windows.Forms.DialogResult]::Yes) {
-      # User clicked "Yes"
-      # Launch Microsoft Teams with the target command
-      Start-Process "C:\Users\$env:USERNAME\AppData\Local\Microsoft\Teams\Update.exe" `
-        -ArgumentList "--processStart", "Teams.exe", "--process-start-args", "--profile=AAD"
-      Clear-Installation
-      exit
-    }
-    else {
-      # User clicked "No"
-      Clear-Installation
-      exit
-    }
-  }
-
   #Function to automatically clear the Microsoft Teams cache
   function Reset-MicrosoftTeams {
     #If there is no OLD folder create one and copy files into it
@@ -267,7 +244,6 @@ SCRIPTED EXECUTION!
 
   Close-MicrosoftTeams
   Reset-MicrosoftTeams
-  Open-MicrosoftTeams
 }
 
 function Clear-AdobeAcrobat {
