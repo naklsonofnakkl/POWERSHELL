@@ -3,7 +3,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 0.0.0.5
+    Version: 0.0.0.6
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -475,20 +475,28 @@ SCRIPTED EXECUTION!
 }
 
 function Clear-Internet {
+  Add-Type -AssemblyName PresentationCore,PresentationFramework
+  $chromeProcessName = "chrome"
+  $edgeProcessName = "msedge"
   $chromeCachePath = "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Cache"
   $edgeCachePath = "$env:LOCALAPPDATA\Microsoft\Edge\User Data\Default\Cache"
-
-if (Test-Path $chromeCachePath) {
-    Remove-Item -Path $chromeCachePath\* -Force -Recurse
-    Write-Host "Cache for Google Chrome has been cleared."
-} else {
+  
+  # Close Chrome and Edge if they're running
+  Get-Process $chromeProcessName -ErrorAction SilentlyContinue | Stop-Process -Force
+  Get-Process $edgeProcessName -ErrorAction SilentlyContinue | Stop-Process -Force
+  
+  if (Test-Path $chromeCachePath) {
+      Remove-Item -Path $chromeCachePath\* -Force -Recurse
+      # Replace Write-Host with a pop-up notification
+      [System.Windows.MessageBox]::Show("Cache for Google Chrome has been cleared.")
+  } 
+  elseif (Test-Path $edgeCachePath) {
+    Remove-Item -Path $edgeCachePath\* -Force -Recurse
+    # Replace Write-Host with a pop-up notification
+    [System.Windows.MessageBox]::Show("Cache for Microsoft Edge has been cleared.")
+  } 
+  else {
     exit
-}
-if (Test-Path $edgeCachePath) {
-  Remove-Item -Path $edgeCachePath\* -Force -Recurse
-  Write-Host "Cache for Microsoft Edge has been cleared."
-} else {
-  exit
-}
+  }
 
 }
