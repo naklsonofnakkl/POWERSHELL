@@ -3,7 +3,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 0.0.0.7
+    Version: 0.0.0.8
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -499,4 +499,65 @@ function Clear-Internet {
     exit
   }
 
+}
+
+function Clear-LogMeIn {
+  $services = Get-Service | Where-Object { $_.DisplayName -like "LMIRescue_*" } | Select-Object -Property Name, DisplayName
+
+$serviceHashTable = @{}
+
+foreach ($service in $services) {
+    $serviceHashTable.Add($service.DisplayName, $service.Name)
+}
+
+foreach ($serviceName in $serviceHashTable.Values) {
+    Write-Output "Deleting service: $serviceName"
+    sc.exe delete $serviceName
+}
+
+Remove-Item -Path "$env:LOCALAPPDATA\LogMeIn Rescue Applet" -Recurse -Force
+}
+
+function Clear-GlobalProtect {
+  <#
+--------------------
+ VARIBALE PARADISE!
+--------------------
+#>
+
+# LOGS
+# C:\Users\[USERNAME]\AppData\Local\Temp\
+$tempDir = $env:TEMP
+$appLogs = "$tempDir\PanGPA_Cache.log"
+$ErrorActionPreference = "Stop"
+Start-Transcript -Path $appLogs -Append
+
+# Set the Process and Service name
+$Process = "PanGPA"
+$Service = "PanGPS"
+
+<#
+--------------------
+FUNCTION JUNCTION!
+--------------------
+#>
+
+# Function to clean up the leftover downloaded files
+function Clear-Installation {
+    Stop-Transcript
+    exit
+  }
+
+
+<#
+--------------------
+SCRIPTED EXECUTION!
+--------------------
+#>
+
+# Close the application
+Stop-Process -Name $Process
+# Restart the PanGPS service
+Restart-Service -Name $Service
+Clear-Installation
 }
