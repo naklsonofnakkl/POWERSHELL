@@ -3,7 +3,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 0.0.0.6
+    Version: 0.0.0.7
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -119,8 +119,8 @@ FUNCTION JUNCTION!
       $accessControl = (Get-Acl $oldoffline).Access
       $writeAccess = $accessControl | Where-Object { $_.FileSystemRights -band [System.Security.AccessControl.FileSystemRights]::Write }
       if (!$writeAccess) {
-        # The folder is not writable, so close the Excel process
-        Get-Process -Name "Excel" | ForEach-Object { $_.CloseMainWindow() }
+        # The folder is not writable, so close the OneNote process
+        Get-Process -Name "ONENOTE" | ForEach-Object { $_.CloseMainWindow() }
       }
       Rename-Item -Path "$outlocal\Offline Address Books" "$outlocal\Offline Address Books.old"
     }
@@ -133,8 +133,8 @@ FUNCTION JUNCTION!
       $accessControl = (Get-Acl $oldoffline).Access
       $writeAccess = $accessControl | Where-Object { $_.FileSystemRights -band [System.Security.AccessControl.FileSystemRights]::Write }
       if (!$writeAccess) {
-        # The folder is not writable, so close the Excel process
-        Get-Process -Name "Excel" | ForEach-Object { $_.CloseMainWindow() }
+        # The folder is not writable, so close the OneNote process
+        Get-Process -Name "ONENOTE" | ForEach-Object { $_.CloseMainWindow() }
       }
       Rename-Item -Path "$outlocal\Offline Address Books" "$outlocal\Offline Address Books.old"
     }
@@ -475,7 +475,7 @@ SCRIPTED EXECUTION!
 }
 
 function Clear-Internet {
-  Add-Type -AssemblyName PresentationCore,PresentationFramework
+  Add-Type -AssemblyName PresentationCore, PresentationFramework
   $chromeProcessName = "chrome"
   $edgeProcessName = "msedge"
   $chromeCachePath = "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Cache"
@@ -486,9 +486,9 @@ function Clear-Internet {
   Get-Process $edgeProcessName -ErrorAction SilentlyContinue | Stop-Process -Force
   
   if (Test-Path $chromeCachePath) {
-      Remove-Item -Path $chromeCachePath\* -Force -Recurse
-      # Replace Write-Host with a pop-up notification
-      [System.Windows.MessageBox]::Show("Cache for Google Chrome has been cleared.")
+    Remove-Item -Path $chromeCachePath\* -Force -Recurse
+    # Replace Write-Host with a pop-up notification
+    [System.Windows.MessageBox]::Show("Cache for Google Chrome has been cleared.")
   } 
   elseif (Test-Path $edgeCachePath) {
     Remove-Item -Path $edgeCachePath\* -Force -Recurse
