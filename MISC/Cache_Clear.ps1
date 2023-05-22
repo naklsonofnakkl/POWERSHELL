@@ -35,7 +35,7 @@ Start-Transcript -Path $appLogs -Append
 # Set the URL of the BBCC module 
 $githubUrl = "https://raw.githubusercontent.com/naklsonofnakkl/POWERSHELL/main/MISC/BBCC.psm1"
 
-# Download the module
+# Download the BBCC
 $bbccPath = Join-Path -Path $tempDir -ChildPath "BBCC.psm1"
 Invoke-WebRequest -Uri $githubUrl -OutFile $bbccPath
 
@@ -51,9 +51,9 @@ function Clear-Installation {
 }
 
 function show-CacheClear {
-Add-Type -AssemblyName PresentationFramework
-# Create the GUI
-[xml]$xaml = @"
+    Add-Type -AssemblyName PresentationFramework
+    # Create the GUI
+    [xml]$xaml = @"
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         Title="NaklWilson Cache Clear" Width="400" Height="200" Topmost="True" Background="DarkBlue" Foreground="White" WindowStartupLocation="CenterScreen">
     <Grid>
@@ -76,42 +76,42 @@ Add-Type -AssemblyName PresentationFramework
 </Window>
 "@
 
-$reader = New-Object System.Xml.XmlNodeReader $xaml
-$Window = [Windows.Markup.XamlReader]::Load($reader)
+    $reader = New-Object System.Xml.XmlNodeReader $xaml
+    $Window = [Windows.Markup.XamlReader]::Load($reader)
 
-# Import the module and retrieve the functions
-Import-Module $bbccPath -Force
-$moduleFunctions = Get-Command -Module BBCC -CommandType Function
+    # Import the module and retrieve the functions
+    Import-Module $bbccPath -Force
+    $moduleFunctions = Get-Command -Module BBCC -CommandType Function
 
-# Modify the function names
-$formattedFunctions = $moduleFunctions | ForEach-Object {
-    # Remove "clear-" from function name for display in dropdown
-    $name = $_ -replace '^clear-', ''  
-    $name
-}
+    # Modify the function names
+    $formattedFunctions = $moduleFunctions | ForEach-Object {
+        # Remove "clear-" from function name for display in dropdown
+        $name = $_ -replace '^clear-', ''  
+        $name
+    }
 
-# Add the formatted function names to the drop-down list
-$dropdown = $Window.FindName("dropdown")
-$dropdown.ItemsSource = $formattedFunctions
+    # Add the formatted function names to the drop-down list
+    $dropdown = $Window.FindName("dropdown")
+    $dropdown.ItemsSource = $formattedFunctions
 
-# Add functions for OK button
-$okButton = $Window.FindName("okButton")
-$okButton.Add_Click({
-        # Get the selected function from the dropdown
-        $selectedFunction = $dropdown.SelectedItem
+    # Add functions for OK button
+    $okButton = $Window.FindName("okButton")
+    $okButton.Add_Click({
+            # Get the selected function from the dropdown
+            $selectedFunction = $dropdown.SelectedItem
 
-        # Add "clear-" prefix to the selected function name
-        $selectedFunction = "clear-" + $selectedFunction
+            # Add "clear-" prefix to the selected function name
+            $selectedFunction = "clear-" + $selectedFunction
 
-        # Execute the selected function
-        & $selectedFunction
+            # Execute the selected function
+            & $selectedFunction
 
-        # Close the window after executing the function
-        $Window.Close()
-    })
+            # Close the window after executing the function
+            $Window.Close()
+        })
 
-# Show the window
-$Window.ShowDialog() | Out-Null
+    # Show the window
+    $Window.ShowDialog() | Out-Null
 }
 
 <#
