@@ -3,7 +3,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 0.0.0.8
+    Version: 0.0.0.9
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -96,6 +96,7 @@ FUNCTION JUNCTION!
 
   #Function to automatically clear the cache of Microsoft Outlook
   function Reset-MicrosoftOutlook {
+
     #If there is no OLD folder create one and copy files into it
     #ROAMING
     if ( -not ( Test-Path -Path $oldroam ) ) {
@@ -138,7 +139,7 @@ FUNCTION JUNCTION!
       }
       Rename-Item -Path "$outlocal\Offline Address Books" "$outlocal\Offline Address Books.old"
     }
-  }
+}
 
   <#
 --------------------
@@ -147,7 +148,13 @@ SCRIPTED EXECUTION!
 #>
 
   Close-MicrosoftOutlook
-  Reset-MicrosoftOutlook
+  try {
+    Reset-MicrosoftOutlook
+  }
+  catch {
+    Add-Type -AssemblyName PresentationFramework
+    [System.Windows.MessageBox]::Show("Unable to clear the cache, please open the log file for more details!", "Error", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Error)
+}
   Open-MicrosoftOutlook
 }
 
@@ -243,7 +250,13 @@ SCRIPTED EXECUTION!
 #>
 
   Close-MicrosoftTeams
-  Reset-MicrosoftTeams
+  try {
+    Reset-MicrosoftTeams
+}
+catch {
+  Add-Type -AssemblyName PresentationFramework
+  [System.Windows.MessageBox]::Show("Unable to clear the cache, please open the log file for more details!", "Error", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Error)
+}
 }
 
 function Clear-AdobeAcrobat {
@@ -471,7 +484,13 @@ SCRIPTED EXECUTION!
 #>
 
   Close-AdobeAcrobat
+  try {
   Reset-AdobeAcrobat
+}
+catch {
+  Add-Type -AssemblyName PresentationFramework
+  [System.Windows.MessageBox]::Show("Unable to clear the cache, please open the log file for more details!", "Error", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Error)
+}
 }
 
 function Clear-Internet {
