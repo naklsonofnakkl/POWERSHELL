@@ -2,7 +2,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 0.0.1.2
+    Version: 0.0.1.3
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -42,17 +42,18 @@ function Clear-Installation {
 
 function Group-USBDevices {
 ## wildcard to grab the generally affected USB drivers
-$deviceNamePattern = "Intel(R) USB 3*"
+$deviceNamePattern = "Intel(R) USB 3.10*"
 ## Get the USB Controller devices matching the wildcard
 $usbDevices = Get-PnpDevice | Where-Object { $_.Class -eq "USB" -and $_.FriendlyName -like $deviceNamePattern }
-$device = $usbDevices.InstanceId
 
 ## If no devices are found, exit gracefully
 if ($usbDevices.Count -eq 0) {
     Write-Host "No matching USB devices found."
     exit
 }
+}
 
+function Reset-USB {
 ## Attempt to disable each device and handle errors
 foreach ($device in $usbDevices) {
     $deviceId = $device.InstanceId
@@ -82,4 +83,6 @@ SCRIPTED EXECUTION!
 --------------------
 #>
 Group-USBDevices
+$device = $usbDevices.InstanceId
+Reset-USB
 Clear-Installation
