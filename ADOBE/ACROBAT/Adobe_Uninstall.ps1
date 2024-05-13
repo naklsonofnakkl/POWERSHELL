@@ -3,7 +3,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 1.0.1.0
+    Version: 1.0.1.1
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -81,7 +81,7 @@ function Show-MissingPopup {
     $form.TopMost = $true
     
     $label = New-Object Windows.Forms.Label
-    $label.Text = "Adobe Acrobat DC was not found07081989.`nContinue running script?"
+    $label.Text = "Adobe Acrobat DC was not found.`nContinue running script?"
     $label.Location = New-Object Drawing.Point(70, 20)
     $label.AutoSize = $true
     
