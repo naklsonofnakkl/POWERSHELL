@@ -1,7 +1,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 1.1.0.1
+    Version: 1.2.0.1
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -26,8 +26,9 @@
 
 #Directories
 $tempDir = $env:TEMP
-$teamroam = "$env:APPDATA\Microsoft\Teams"
-$oldroam = "$env:APPDATA\Microsoft\Teams\OLD"
+$teamlocal = "$env:LOCALAPPDATA\Packages\MSTeams_8wekyb3d8bbwe\LocalCache\Microsoft\MSTeams"
+$teamoldlocal = "$env:LOCALAPPDATA\Packages\MSTeams_8wekyb3d8bbwe\LocalCache\Microsoft\MSTeams\OLD"
+$teamExe = "$env:LOCALAPPDATA\Microsoft\WindowsApps\MSTeams_8wekyb3d8bbwe\ms-teams.exe"
 
 # LOGS
 # C:\Users\[USERNAME]\AppData\Local\Temp\
@@ -49,9 +50,9 @@ function Clear-Installation {
 #Function to automatically close Microsoft Teams
 function Close-MicrosoftTeams {
   
-  if (Get-Process -Name "Teams" -ErrorAction SilentlyContinue) {
+  if (Get-Process -Name "ms-teams" -ErrorAction SilentlyContinue) {
     # Close out of TEAMS
-    Stop-Process -name Teams -force
+    Stop-Process -name ms-teams -force
 
     # Set the duration of the timer in seconds
     $duration = 10
@@ -88,8 +89,8 @@ function Open-MicrosoftTeams {
   if ($result -eq [System.Windows.Forms.DialogResult]::Yes) {
     # User clicked "Yes"
     # Launch Microsoft Teams with the target command
-    Start-Process "C:\Users\$env:USERNAME\AppData\Local\Microsoft\Teams\Update.exe" `
-      -ArgumentList "--processStart", "Teams.exe", "--process-start-args", "--profile=AAD"
+    Start-Process $teamExe `
+      -ArgumentList "--processStart", "ms-teams.exe", "--process-start-args", "--profile=AAD"
     Clear-Installation
     exit
   }
@@ -104,23 +105,23 @@ function Open-MicrosoftTeams {
 function Reset-MicrosoftTeams {
   #If there is no OLD folder create one and copy files into it
   #ROAMING
-  if ( -not ( Test-Path -Path $oldroam ) ) {
-    New-Item -path $teamroam -name OLD -ItemType Directory
-    set-location $teamroam
-    $filedest = $oldroam
-    $exclude = ".\meeting-addin", ".\OLD"
-    $Files = Get-ChildItem -path $teamroam | Where-object { $_.name -ne $exclude }
+  if ( -not ( Test-Path -Path $teamoldlocal ) ) {
+    New-Item -path $teamlocal -name OLD -ItemType Directory
+    set-location $teamlocal
+    $filedest = $teamoldlocal
+    $exclude = ".\OLD"
+    $Files = Get-ChildItem -path $teamlocal | Where-object { $_.name -ne $exclude }
     foreach ($file in $files) { move-item -path $file -destination $filedest -ErrorAction SilentlyContinue }
   }
   #If there is an OLD folder erase the OLD folder and create fresh Copy
   #ROAMING
   else {
-    Remove-Item -Path "$teamroam\OLD" -Recurse -Force
-    New-Item -path $teamroam -name OLD -ItemType Directory
-    set-location $teamroam
-    $filedest = $oldroam
-    $exclude = ".\meeting-addin", ".\OLD"
-    $Files = Get-ChildItem -path $teamroam | Where-object { $_.name -ne $exclude }
+    Remove-Item -Path "$teamlocal\OLD" -Recurse -Force
+    New-Item -path $teamlocal -name OLD -ItemType Directory
+    set-location $teamlocal
+    $filedest = $teamoldlocal
+    $exclude = ".\OLD"
+    $Files = Get-ChildItem -path $teamlocal | Where-object { $_.name -ne $exclude }
     foreach ($file in $files) { move-item -path $file -destination $filedest -ErrorAction SilentlyContinue }
   }
 }
