@@ -1,7 +1,7 @@
 <#
 .NOTES
     Author: Andrew Wilson
-    Version: 1.2.0.2
+    Version: 1.3.0.0
     
 .LINK
     https://github.com/naklsonofnakkl/POWERSHELL
@@ -9,13 +9,10 @@
 .SYNOPSIS
     Clear the cache for Microsoft Teams
 .DESCRIPTION
-    - Checks if Teams is running and closes if necessary
-    - Checks if an OLD folder exists
-    - If OLD folder exists, clear out contents and create fresh folder
-    - If no OLD folder exists, create one
-    - Move all files and folders except for OLD and Meeting-Addin to OLD folder
-    - Ask if user wants to open Teams back up
-
+    - Checks if Teams or dependant programs are running and closes if necessary
+    - Clears the temporary cache folder
+    - Starts Teams back up after successful cache clear
+    
 #>
 
 <#
@@ -26,9 +23,8 @@
 
 #Directories
 $tempDir = $env:TEMP
-$teamlocal = "$env:LOCALAPPDATA\Packages\MSTeams_8wekyb3d8bbwe\LocalCache\Microsoft\MSTeams"
-$teamoldlocal = "$env:LOCALAPPDATA\Packages\MSTeams_8wekyb3d8bbwe\LocalCache\Microsoft\MSTeams\OLD"
-$teamExe = "$env:LOCALAPPDATA\Microsoft\WindowsApps\MSTeams_8wekyb3d8bbwe\ms-teams.exe"
+$teamsCache = "$env:LOCALAPPDATA\Packages\MSTeams_8wekyb3d8bbwe\LocalCache\Microsoft\MSTeams"
+$folders = Get-ChildItem -Directory $teamsCache | Where-Object { $_.PSIsContainer } | Foreach-Object { $_.Name }
 
 # LOGS
 # C:\Users\[USERNAME]\AppData\Local\Temp\
@@ -48,59 +44,73 @@ function Clear-Installation {
 }
 
 #Function to automatically close Microsoft Teams
-function Close-MicrosoftTeams {
-  
-  if (Get-Process -Name "ms-teams" -ErrorAction SilentlyContinue) {
-    # Close out of TEAMS
-    Stop-Process -name ms-teams -force
-
-    # Set the duration of the timer in seconds
-    $duration = 10
-
-    # Initialize the progress bar
-    Write-Progress -Activity "Waiting for $duration seconds while Teams closes..." -PercentComplete 0
-
-    # Loop through the timer and update the progress bar
-    for ($i = 1; $i -le $duration; $i++) {
-      # Update the progress bar with the current progress
-      $percent = ($i / $duration) * 100
-      Write-Progress -Activity "Waiting for $duration seconds while Teams closes..." -PercentComplete $percent -Status "Seconds remaining: $($duration - $i)"
-    
-      # Pause for 1 second
-      Start-Sleep -Seconds 1
+function Remove-ProcessTree {
+    $officeApps = @("ms-teams", "ms-teams-updater", "ms-teams-relauncher")
+    $procs = Get-CimInstance Win32_Process |
+    Select-Object Name, ProcessId, ParentProcessId
+    $teams = $procs | Where-Object { $_.Name -match '^ms-teams|teams' }
+    if (-not $teams) {
+        Write-Warning "Teams is not running."
+        return
+    }
+    $primaryWebView = $procs |
+    Where-Object {
+        $_.Name -eq 'msedgewebview2.exe' -and
+        ($teams.ProcessId -contains $_.ParentProcessId)
     }
 
-    # Clear the progress bar once the timer is complete
-    Write-Progress -Completed -Activity "Microsoft Teams is Closed!"
-  }
-  else {
+    if (-not $primaryWebView) {
+        Write-Warning "No msedgewebview2.exe child found under Teams."
+        return
+    }
+    $primaryPID = $primaryWebView[0].ProcessId
+    $secondaryWebViews = $procs |
+    Where-Object {
+        $_.Name -eq 'msedgewebview2.exe' -and
+        $_.ParentProcessId -eq $primaryPID -and
+        $_.ProcessId -ne $primaryPID
+    }
+    foreach ($p in $secondaryWebViews) {
+        try {
+            Stop-Process -Id $p.ProcessId -Force -ErrorAction Stop
+            Write-Output "Stopped msedgewebview2.exe PID $($p.ProcessId) (child of $primaryPID)"
+        }
+        catch {
+            Write-Warning "Failed to stop PID $($p.ProcessId): $_"
+        }
+    }
+    foreach ($app in $officeApps) {
+        try {
+            Stop-Process -Name $app -Force -ErrorAction SilentlyContinue
+            Write-Host "Application Closed: $app"
+        }
+        catch {
+            Write-Host "Failed to close application: $app"
+        }
+    }
 
-  }
+    # Output summary
+    [PSCustomObject]@{
+        TeamsPID           = $teams.ProcessId
+        PrimaryWebView2PID = $primaryPID
+        RemovedChildPIDs   = $secondaryWebViews.ProcessId
+    }
+    Start-Sleep -Seconds 2 
 }
 
-#Function to automatically clear the Microsoft Teams cache
-function Reset-MicrosoftTeams {
-  #If there is no OLD folder create one and copy files into it
-  #ROAMING
-  if ( -not ( Test-Path -Path $teamoldlocal ) ) {
-    New-Item -path $teamlocal -name OLD -ItemType Directory
-    set-location $teamlocal
-    $filedest = $teamoldlocal
-    $exclude = ".\OLD"
-    $Files = Get-ChildItem -path $teamlocal | Where-object { $_.name -ne $exclude }
-    foreach ($file in $files) { move-item -path $file -destination $filedest -ErrorAction SilentlyContinue }
-  }
-  #If there is an OLD folder erase the OLD folder and create fresh Copy
-  #ROAMING
-  else {
-    Remove-Item -Path "$teamlocal\OLD" -Recurse -Force
-    New-Item -path $teamlocal -name OLD -ItemType Directory
-    set-location $teamlocal
-    $filedest = $teamoldlocal
-    $exclude = ".\OLD"
-    $Files = Get-ChildItem -path $teamlocal | Where-object { $_.name -ne $exclude }
-    foreach ($file in $files) { move-item -path $file -destination $filedest -ErrorAction SilentlyContinue }
-  }
+Function Clear-TeamsCache {
+    foreach ($folder in $folders) {
+        try {
+            if (Test-Path $teamsCache) {
+                Get-ChildItem -Path $teamsCache | Remove-Item -Confirm:$false -Recurse -Force
+            }
+        }
+        catch [System.Exception] {
+            Write-Error $_.Exception.Message
+        }
+    }
+    Start-Sleep -Seconds 2
+    Start-Process ms-teams
 }
 
 <#
@@ -109,9 +119,7 @@ SCRIPTED EXECUTION!
 --------------------
 #>
 
-Close-MicrosoftTeams
-Reset-MicrosoftTeams
-Start-Process $teamExe `
-  -ArgumentList "--processStart", "ms-teams.exe", "--process-start-args", "--profile=AAD"
-Clear-Installation
+Remove-ProcessTree
+Clear-TeamsCache
+Stop-Transcript
 exit
